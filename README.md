@@ -1,44 +1,87 @@
-# Jaeger::Client::Wrapper
+# Jaeger::Client::Wrapper &middot; [![Supporting](https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_badge.png)](https://github.com/Cado-Labs/) &middot; [![Coverage Status](https://coveralls.io/repos/github/Cado-Labs/jaeger-client-wrapper/badge.svg?branch=gem-without-zeitwerk)](https://coveralls.io/github/Cado-Labs/jaeger-client-wrapper?branch=gem-without-zeitwerk)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/jaeger/client/wrapper`. To experiment with that code, run `bin/console` for an interactive prompt.
+Simple wrapper for the gem "jaeger-client" with simpler customization.
 
-TODO: Delete this and the text above, and describe your gem
+---
+
+<p>
+  <a href="https://github.com/Cado-Labs">
+    <img src="https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_supporting.svg" alt="Supported by Cado Labs" />
+  </a>
+</p>
+
+---
 
 ## Installation
-
-Add this line to your application's Gemfile:
 
 ```ruby
 gem 'jaeger-client-wrapper'
 ```
 
-And then execute:
+```shell
+bundle install
+# --- or ---
+gem install jaeger-client-wrapper
+```
 
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install jaeger-client-wrapper
+```ruby
+require 'jaeger_client_wrapper' 
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+Create new initializer for your rails app:
 
-## Development
+UDP Sender(default):
+```ruby
+::Jaeger::Client::Wrapper.configure do |config|
+  config.service_name = "Service name"
+  config.connection = { protocol: :udp, host: "127.0.0.1", port: 6831 }
+  config.enabled = true
+  config.orm = :sequel # :sequel or :active_record, default: :sequel
+  config.trace_sql_request = true
+  config.tags = {
+    hostname: "custom-hostname",
+    custom_tag: "custom-tag-value",
+  }
+end
+```
 
-After checking out the repo, run `bin/setup` to install dependencies. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+TCP Sender:
+```ruby
+::Jaeger::Client::Wrapper.configure do |config|
+  config.service_name = "Service name"
+  config.enabled = true
+  config.subscribe_to = %w[process_action.action_controller start_processing.action_controller] # set ActiveSupport::Notifications namespaces
+  config.orm = :sequel # :sequel or :active_record, default: :sequel
+  config.trace_sql_request = true
+  config.connection = { protocol: :tcp, url: "http://localhost:14268/api/traces", headers: { key: "value" } }
+  config.tags = {
+    hostname: "custom-hostname",
+    custom_tag: "custom-tag-value",
+  }
+end
+```
+- `config.subscribe_to` - not recommended for UDP sender
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/jaeger-client-wrapper. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/jaeger-client-wrapper/blob/master/CODE_OF_CONDUCT.md).
-
+### Contributing
+ 
+ - Fork it ( https://github.com/Cado-Labs/jaeger-client-wrapper )
+ - Create your feature branch (`git checkout -b feature/my-new-feature`)
+ - Commit your changes (`git commit -am '[feature_context] Add some feature'`)
+ - Push to the branch (`git push origin feature/my-new-feature`)
+ - Create new Pull Request
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+Released under MIT License.
 
-## Code of Conduct
+## Supporting
 
-Everyone interacting in the Jaeger::Client::Wrapper project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/jaeger-client-wrapper/blob/master/CODE_OF_CONDUCT.md).
+<a href="https://github.com/Cado-Labs">
+  <img src="https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_logo.png" alt="Supported by Cado Labs" />
+</a>
+
+## Authors
+
+[Aleksandr Starovojtov](https://github.com/AS-AlStar)
