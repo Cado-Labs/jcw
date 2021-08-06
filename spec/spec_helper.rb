@@ -23,7 +23,7 @@ if ENV["COVER"]
 end
 
 require "bundler/setup"
-require "jaeger_client_wrapper"
+require "jcw"
 require "pry"
 require "test_rails_app"
 

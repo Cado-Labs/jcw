@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-RSpec.describe Jaeger::Client::Wrapper do
+RSpec.describe JCW::Wrapper do
   def set_jaeger
-    ::Jaeger::Client::Wrapper.configure do |config|
+    ::JCW::Wrapper.configure do |config|
       config.service_name = "ServiceName"
       config.connection = connection
       config.enabled = enabled
@@ -152,7 +152,7 @@ RSpec.describe Jaeger::Client::Wrapper do
 
   context "when connection TCP" do
     after do
-      ::Jaeger::Client::Wrapper.configure do |config|
+      ::JCW::Wrapper.configure do |config|
         config.service_name = "ServiceName"
         config.connection = {
           protocol: :tcp,

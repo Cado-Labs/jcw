@@ -1,4 +1,4 @@
-# Jaeger::Client::Wrapper &middot; [![Supporting](https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_badge.png)](https://github.com/Cado-Labs/) &middot; [![Coverage Status](https://coveralls.io/repos/github/Cado-Labs/jaeger-client-wrapper/badge.svg?branch=gem-without-zeitwerk)](https://coveralls.io/github/Cado-Labs/jaeger-client-wrapper?branch=gem-without-zeitwerk)
+# JCW &middot; [![Supporting](https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_badge.png)](https://github.com/Cado-Labs/) &middot; [![Coverage Status](https://coveralls.io/repos/github/Cado-Labs/jcw/badge.svg?branch=gem-without-zeitwerk)](https://coveralls.io/github/Cado-Labs/jcw?branch=gem-without-zeitwerk)
 
 Simple wrapper for the gem "jaeger-client" with simpler customization.
 
@@ -15,17 +15,17 @@ Simple wrapper for the gem "jaeger-client" with simpler customization.
 ## Installation
 
 ```ruby
-gem 'jaeger-client-wrapper'
+gem 'jcw'
 ```
 
 ```shell
 bundle install
 # --- or ---
-gem install jaeger-client-wrapper
+gem install jcw
 ```
 
 ```ruby
-require 'jaeger_client_wrapper' 
+require 'jcw' 
 ```
 
 ## Usage
@@ -34,7 +34,7 @@ Create new initializer for your rails app:
 
 UDP Sender(default):
 ```ruby
-::Jaeger::Client::Wrapper.configure do |config|
+::JCW::Wrapper.configure do |config|
   config.service_name = "Service name"
   config.connection = { protocol: :udp, host: "127.0.0.1", port: 6831 }
   config.enabled = true
@@ -49,7 +49,7 @@ end
 
 TCP Sender:
 ```ruby
-::Jaeger::Client::Wrapper.configure do |config|
+::JCW::Wrapper.configure do |config|
   config.service_name = "Service name"
   config.enabled = true
   config.subscribe_to = %w[process_action.action_controller start_processing.action_controller] # set ActiveSupport::Notifications namespaces
@@ -66,7 +66,7 @@ end
 
 ### Contributing
  
- - Fork it ( https://github.com/Cado-Labs/jaeger-client-wrapper )
+ - Fork it ( https://github.com/Cado-Labs/jcw )
  - Create your feature branch (`git checkout -b feature/my-new-feature`)
  - Commit your changes (`git commit -am '[feature_context] Add some feature'`)
  - Push to the branch (`git push origin feature/my-new-feature`)

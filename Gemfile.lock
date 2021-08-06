@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jaeger-client-wrapper (0.1.0)
+    jcw (0.1.0)
       activerecord-opentracing (~> 0.3.1)
       activesupport (>= 5.0)
       httprb-opentracing (~> 0.4.0)
@@ -197,7 +197,7 @@ DEPENDENCIES
   bundler-audit
   http
   http-parser
-  jaeger-client-wrapper!
+  jcw!
   pry
   railties
   rake

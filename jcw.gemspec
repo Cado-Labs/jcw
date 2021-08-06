@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
-require_relative "lib/jaeger/client/wrapper/version"
+require_relative "lib/jcw/version"
 
 Gem::Specification.new do |spec|
-  spec.name          = "jaeger-client-wrapper"
-  spec.version       = Jaeger::Client::Wrapper::VERSION
+  spec.name          = "jcw"
+  spec.version       = JCW::VERSION
   spec.authors       = ["Alexander Starovojtov"]
   spec.email         = ["starovojtov.alexander@gmail.com"]
 
   spec.summary       = "Wrapper for jaeger-client"
-  spec.description   = 'Wrapper for the gem "jaeger-client" with simpler customization.'
-  spec.homepage      = "https://github.com/Cado-Labs/jaeger-client-wrapper"
+  spec.description   = 'Wrapper for the gem "jcw" with simpler customization.'
+  spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
 

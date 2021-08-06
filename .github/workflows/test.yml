@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     # We want to run on external PRs, but not on our own internal PRs as they'll be run on push event
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Cado-Labs/jaeger-client-wrapper'
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Cado-Labs/jcw'
 
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
       COVER: false
 
     # We want to run on external PRs, but not on our own internal PRs as they'll be run on push event
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Cado-Labs/jaeger-client-wrapper'
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != 'Cado-Labs/jcw'
 
     strategy:
       fail-fast: false
