@@ -33,7 +33,7 @@ module JCW
         Jaeger::Reporters::RemoteReporter.new(
           sender: Jaeger::HttpSender.new(
             url: config.connection[:url],
-            headers: config.connection[:headers],
+            headers: config.connection[:headers] || {},
             encoder: Jaeger::Encoders::ThriftEncoder.new(
               service_name: config.service_name,
               tags: config.tags,
