@@ -28,11 +28,6 @@ RSpec.describe JCW::Wrapper do
     expect(OpenTracing.global_tracer.class).to eq Jaeger::Tracer
   end
 
-  specify "Rails not found" do
-    allow(Object).to receive(:const_defined?).with("Rails").and_return(false)
-    expect { set_jaeger }.to raise_error(RuntimeError, "Rails not found")
-  end
-
   context "ActiveSupport::Notifications subscribers" do
     context "send fake message to subscribers" do
       let(:start_args) { %w[start_processing.action_controller arg1 arg2 arg3 arg4] }
@@ -105,10 +100,6 @@ RSpec.describe JCW::Wrapper do
       expect(Jaeger::Client).to receive(:build).with(udp_setting)
     end
 
-    it "inserts middleware RackTracer" do
-      expect(Rails.application.middleware).to receive(:use).with(Rack::Tracer)
-    end
-
     it "set HttpTracer" do
       expect(HTTP::Tracer).to receive(:instrument)
     end
@@ -174,7 +165,6 @@ RSpec.describe JCW::Wrapper do
 
     it "set config" do
       expect(Jaeger::Client).to receive(:build).with(any_args)
-      expect(Rails.application.middleware).to receive(:use).with(Rack::Tracer)
       expect(HTTP::Tracer).to receive(:instrument)
       expect(Sequel::OpenTracing).to receive(:instrument)
     end

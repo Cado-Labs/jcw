@@ -45,6 +45,10 @@ UDP Sender(default):
     custom_tag: "custom-tag-value",
   }
 end
+
+# Set middleware for wrapping all requests
+
+Rails.application.middleware.use(JCW::RackMiddleware)
 ```
 
 TCP Sender:
@@ -61,6 +65,10 @@ TCP Sender:
     custom_tag: "custom-tag-value",
   }
 end
+
+# Set middleware for wrapping all requests
+
+Rails.application.middleware.use(JCW::RackMiddleware)
 ```
 - `config.subscribe_to` - not recommended for UDP sender
 

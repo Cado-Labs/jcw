@@ -5,7 +5,6 @@ module JCW
     class << self
       def call
         init_jaeger_client
-        set_rack_tracer_middleware
         activate_subscribers
         init_http_tracer
         init_sequel
@@ -41,13 +40,6 @@ module JCW
           ),
           flush_interval: config.flush_interval,
         )
-      end
-
-      def set_rack_tracer_middleware
-        raise "Rails not found" unless Object.const_defined?("Rails")
-        return unless config.enabled?
-
-        Rails.application.middleware.use(Rack::Tracer)
       end
 
       def activate_subscribers
