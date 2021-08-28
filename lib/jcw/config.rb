@@ -7,9 +7,7 @@ module JCW
                 :subscribe_to,
                 :connection,
                 :flush_interval,
-                :tags,
-                :orm,
-                :trace_sql_request
+                :tags
 
     def enabled
       @enabled ||= false
@@ -36,15 +34,5 @@ module JCW
     def tags
       @tags ||= {}
     end
-
-    def orm
-      @orm ||= :sequel
-    end
-
-    def trace_sql_request
-      @trace_sql_request ||= false
-    end
-
-    alias trace_sql_request? trace_sql_request
   end
 end

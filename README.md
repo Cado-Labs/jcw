@@ -38,17 +38,14 @@ UDP Sender(default):
   config.service_name = "Service name"
   config.connection = { protocol: :udp, host: "127.0.0.1", port: 6831 }
   config.enabled = true
-  config.orm = :sequel # :sequel or :active_record, default: :sequel
-  config.trace_sql_request = true
   config.tags = {
     hostname: "custom-hostname",
     custom_tag: "custom-tag-value",
   }
 end
 
-# Set middleware for wrapping all requests
-
-Rails.application.middleware.use(JCW::RackMiddleware)
+# Set middleware for wrapping all requests(gem RackTracer)
+Rails.application.middleware.use(JCW::RackTracer)
 ```
 
 TCP Sender:
@@ -57,8 +54,6 @@ TCP Sender:
   config.service_name = "Service name"
   config.enabled = true
   config.subscribe_to = %w[process_action.action_controller start_processing.action_controller] # set ActiveSupport::Notifications namespaces
-  config.orm = :sequel # :sequel or :active_record, default: :sequel
-  config.trace_sql_request = true
   config.connection = { protocol: :tcp, url: "http://localhost:14268/api/traces", headers: { key: "value" } }
   config.tags = {
     hostname: "custom-hostname",
@@ -67,10 +62,20 @@ TCP Sender:
 end
 
 # Set middleware for wrapping all requests
+Rails.application.middleware.use(JCW::RackTracer)
 
-Rails.application.middleware.use(JCW::RackMiddleware)
+# If you need send all logs with spans set on_finish_span and extend JaegerLoggerExtension
+# Not recommended for UDP sender, because default max packet size is 65,000 bytes.
+Rails.application.config.tap do |config|
+  config.middleware.use(
+  ::JCW::RackTracer,
+  on_finish_span:
+    -> (span) { ::JCW::JaegerLogger.current.logs.each { |log| span.log_kv(**log) } },
+  )
+  config.logger.extend(::JCW::JaegerLoggerExtension)
+end
 ```
-- `config.subscribe_to` - not recommended for UDP sender
+- `config.subscribe_to` - not recommended for UDP sender, because default max packet size is 65,000 bytes.
 
 ### Contributing
  

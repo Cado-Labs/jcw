@@ -7,8 +7,6 @@ module JCW
         init_jaeger_client
         activate_subscribers
         init_http_tracer
-        init_sequel
-        init_active_record
       end
 
       private
@@ -54,20 +52,6 @@ module JCW
         HTTP::Tracer.instrument
         HTTP::Tracer.remove # remove after gem 'httprb-opentracing' released PR#8
         HttpTracer.patch_perform # remove after gem 'httprb-opentracing' released PR#8
-      end
-
-      def init_sequel
-        return unless config.trace_sql_request?
-        return unless config.orm == :sequel
-
-        Sequel::OpenTracing.instrument
-      end
-
-      def init_active_record
-        return unless config.trace_sql_request?
-        return unless config.orm == :active_record
-
-        ActiveRecord::OpenTracing.instrument
       end
 
       def config

@@ -22,12 +22,10 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activerecord-opentracing", "~> 0.3.1"
   spec.add_dependency "activesupport", ">= 5.0"
   spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "jaeger-client", "~> 1.1.0"
   spec.add_dependency "rack-tracer", "~> 0.9.0"
-  spec.add_dependency "sequel-opentracing", "~> 0.0.4.pre"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"

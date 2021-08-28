@@ -6,9 +6,7 @@ RSpec.describe JCW::Wrapper do
       config.service_name = "ServiceName"
       config.connection = connection
       config.enabled = enabled
-      config.trace_sql_request = trace_sql_request
       config.flush_interval = 10
-      config.orm = orm
       config.subscribe_to = subscribe_to
       config.tags = {
         hostname: "custom-hostname",
@@ -17,10 +15,8 @@ RSpec.describe JCW::Wrapper do
     end
   end
 
-  let(:trace_sql_request) { true }
   let(:enabled) { true }
   let(:connection) { { protocol: :udp, host: "127.0.0.1", port: 6831 } }
-  let(:orm) { :sequel }
   let(:subscribe_to) { %w[process_action.action_controller start_processing.action_controller] }
 
   specify "set OpenTracing.global_tracer" do
@@ -104,34 +100,6 @@ RSpec.describe JCW::Wrapper do
       expect(HTTP::Tracer).to receive(:instrument)
     end
 
-    it "set Sequel::OpenTracing" do
-      expect(Sequel::OpenTracing).to receive(:instrument)
-    end
-
-    context "trace_sql_request disabled and orm :sequel" do
-      let(:trace_sql_request) { false }
-
-      it "Sequel::OpenTracing not set" do
-        expect(Sequel::OpenTracing).not_to receive(:instrument)
-      end
-    end
-
-    context "when Active Record" do
-      let(:orm) { :active_record }
-
-      it "set ActiveRecord::OpenTracing" do
-        expect(ActiveRecord::OpenTracing).to receive(:instrument)
-      end
-
-      context "trace_sql_request disabled" do
-        let(:trace_sql_request) { false }
-
-        it "ActiveRecord::OpenTracing not set" do
-          expect(ActiveRecord::OpenTracing).not_to receive(:instrument)
-        end
-      end
-    end
-
     context "when config disabled" do
       let(:enabled) { false }
 
@@ -151,9 +119,7 @@ RSpec.describe JCW::Wrapper do
           headers: {},
         }
         config.enabled = true
-        config.trace_sql_request = true
         config.flush_interval = 10
-        config.orm = :sequel
         config.subscribe_to =
           %w[process_action.action_controller start_processing.action_controller]
         config.tags = {
@@ -166,7 +132,6 @@ RSpec.describe JCW::Wrapper do
     it "set config" do
       expect(Jaeger::Client).to receive(:build).with(any_args)
       expect(HTTP::Tracer).to receive(:instrument)
-      expect(Sequel::OpenTracing).to receive(:instrument)
     end
   end
 end
