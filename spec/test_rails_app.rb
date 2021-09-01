@@ -12,6 +12,7 @@ def make_basic_app
     end
   end
 
+  app.config.logger = Logger.new(nil)
   app.config.hosts = nil
   app.config.secret_key_base = "test"
   app.config.eager_load = true

@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["starovojtov.alexander@gmail.com"]
 
   spec.summary       = "Wrapper for jaeger-client"
-  spec.description   = 'Wrapper for the gem "jcw" with simpler customization.'
+  spec.description   = "Wrapper for the gem 'jaeger-client' with simpler customization."
   spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")

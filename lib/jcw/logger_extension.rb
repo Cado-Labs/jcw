@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-# :nocov:
 module JCW
-  module JaegerLoggerExtension
+  module LoggerExtension
     def add(*args, &block)
       super(*args, &block)
 
-      JaegerLogger.current.add(*args)
+      Logger.current.add(*args)
     end
   end
 end
-# :nocov:
