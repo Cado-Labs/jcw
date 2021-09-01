@@ -14,7 +14,7 @@ module JCW
       def init_jaeger_client
         return unless config.enabled?
 
-        reporter = config.connection[:protocol] == :tcp ? tcp_reporter : nil
+        reporter = config.connection[:protocol].to_sym == :tcp ? tcp_reporter : nil
 
         OpenTracing.global_tracer = Jaeger::Client.build(
           service_name: config.service_name,
