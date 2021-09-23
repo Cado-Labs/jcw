@@ -70,9 +70,9 @@ Rails.application.config.tap do |config|
   config.middleware.use(
   ::JCW::RackTracer,
   on_finish_span:
-    -> (span) { ::JCW::JaegerLogger.current.logs.each { |log| span.log_kv(**log) } },
+    -> (span) { ::JCW::Logger.current.logs.each { |log| span.log_kv(**log) } },
   )
-  config.logger.extend(::JCW::JaegerLoggerExtension)
+  config.logger.extend(::JCW::LoggerExtension)
 end
 ```
 - `config.subscribe_to` - not recommended for UDP sender, because default max packet size is 65,000 bytes.
