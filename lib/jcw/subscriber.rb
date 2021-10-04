@@ -1,26 +1,29 @@
 # frozen_string_literal: true
 
 module JCW
-  class Subscriber
-    class << self
-      def subscribe_to_event!(event_name)
-        ActiveSupport::Notifications.subscribe(event_name) do |*args|
-          (span = OpenTracing.scope_manager.active&.span) or next
-          event = ActiveSupport::Notifications::Event.new(*args)
-          span.log_kv(context: span_context(event))
-        end
+  module Subscriber
+    extend self
+
+    IGNORED_DATA_TYPES = %i[request response headers exception exception_object].freeze
+
+    def subscribe_to_event!(event)
+      ActiveSupport::Notifications.subscribe(event) do |name, started, finished, unique_id, data|
+        add(name, started, finished, unique_id, data)
+      end
+    end
+
+    def add(name, _started, _finished, _unique_id, data)
+      # skip Rails internal events
+      return if name.start_with?("!")
+      return if (span = OpenTracing.scope_manager.active&.span).blank?
+
+      if data.is_a?(Hash)
+        # we should only mutate the copy of the data
+        data = data.dup
+        IGNORED_DATA_TYPES.each { |key| data.delete(key) if data.key?(key) } # cleanup data
       end
 
-      private
-
-      def span_context(event)
-        {
-          name: event.name,
-          time: event.time,
-          payload: event.payload.to_s,
-          transaction_id: event.transaction_id,
-        }.as_json
-      end
+      span.log_kv(message: name, context: JSON.dump(data))
     end
   end
 end

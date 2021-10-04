@@ -17,7 +17,6 @@ module JCW
   end
 end
 
-require_relative "tracing"
 require_relative "init"
 require_relative "subscriber"
 require_relative "http_tracer"

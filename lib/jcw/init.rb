@@ -41,11 +41,10 @@ module JCW
       end
 
       def activate_subscribers
-        subscribers = config.subscribe_to
-        return if subscribers.blank?
+        events = config.subscribe_to
+        return if events.blank?
 
-        Tracing.register_subscribers(subscribers)
-        Tracing.subscribe_tracing_events
+        events.each { |event| JCW::Subscriber.subscribe_to_event!(event) }
       end
 
       def init_http_tracer
