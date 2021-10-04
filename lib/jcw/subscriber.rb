@@ -4,7 +4,7 @@ module JCW
   module Subscriber
     extend self
 
-    IGNORED_DATA_TYPES = %i[request response headers exception exception_object].freeze
+    IGNORED_DATA_KEYS = %i[request response headers exception exception_object].freeze
 
     def subscribe_to_event!(event)
       ActiveSupport::Notifications.subscribe(event) do |name, started, finished, unique_id, data|
@@ -22,7 +22,7 @@ module JCW
       if data.is_a?(Hash)
         # we should only mutate the copy of the data
         data = data.dup
-        IGNORED_DATA_TYPES.each { |key| data.delete(key) if data.key?(key) } # cleanup data
+        IGNORED_DATA_KEYS.each { |key| data.delete(key) if data.key?(key) } # cleanup data
       end
 
       span.log_kv(message: name, context: JSON.dump(data))
