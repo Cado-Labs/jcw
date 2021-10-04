@@ -4,28 +4,28 @@ module JCW
   module Subscriber
     extend self
 
-    IGNORED_DATA_KEYS = %i[request response headers exception exception_object].freeze
+    IGNORED_PAYLOAD_KEYS = %i[request response headers exception exception_object].freeze
 
     def subscribe_to_event!(event)
-      ActiveSupport::Notifications.subscribe(event) do |name, started, finished, unique_id, data|
-        add(name, started, finished, unique_id, data)
+      ActiveSupport::Notifications.subscribe(event) do |name, _start, _finish, _uid, payload|
+        add(name, payload)
       end
     end
 
-    def add(name, _started, _finished, _unique_id, data)
+    def add(name, payload)
       # skip Rails internal events
       return if name.start_with?("!")
 
       span = OpenTracing.scope_manager.active&.span
       return if span.blank?
 
-      if data.is_a?(Hash)
-        # we should only mutate the copy of the data
-        data = data.dup
-        IGNORED_DATA_KEYS.each { |key| data.delete(key) if data.key?(key) } # cleanup data
+      if payload.is_a?(Hash)
+        # we should only mutate the copy of the payload
+        payload = payload.dup
+        IGNORED_PAYLOAD_KEYS.each { |key| payload.delete(key) if payload.key?(key) }
       end
 
-      span.log_kv(message: name, context: JSON.dump(data))
+      span.log_kv(message: name, context: JSON.dump(payload))
     end
   end
 end
