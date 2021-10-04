@@ -51,7 +51,6 @@ RSpec.describe JCW::Wrapper do
 
     specify "set subscribers" do
       expect(ActiveSupport::Notifications).to receive(:subscribe).with(/.*/)
-
       set_jaeger
     end
 
@@ -59,10 +58,7 @@ RSpec.describe JCW::Wrapper do
       let(:subscribe_to) { [] }
 
       specify "subscribers not set" do
-        expect(ActiveSupport::Notifications).not_to \
-          receive(:subscribe).with("process_action.action_controller")
-        expect(ActiveSupport::Notifications).not_to \
-          receive(:subscribe).with("start_processing.action_controller")
+        expect(ActiveSupport::Notifications).not_to receive(:subscribe).with(/.*/)
         set_jaeger
       end
     end
