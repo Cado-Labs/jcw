@@ -17,7 +17,7 @@ RSpec.describe JCW::Wrapper do
 
   let(:enabled) { true }
   let(:connection) { { protocol: :udp, host: "127.0.0.1", port: 6831 } }
-  let(:subscribe_to) { %w[process_action.action_controller start_processing.action_controller] }
+  let(:subscribe_to) { [/.*/] }
 
   specify "set OpenTracing.global_tracer" do
     set_jaeger
@@ -26,37 +26,32 @@ RSpec.describe JCW::Wrapper do
 
   context "ActiveSupport::Notifications subscribers" do
     context "send fake message to subscribers" do
-      let(:start_args) { %w[start_processing.action_controller arg1 arg2 arg3 arg4] }
-      let(:procces_args) { %w[process_action.action_controller arg1 arg2 arg3 arg4] }
-      let(:start_event) { ActiveSupport::Notifications::Event.new(*start_args) }
-      let(:process_event) { ActiveSupport::Notifications::Event.new(*procces_args) }
+      let(:args) { [Time.now, Time.now, SecureRandom.hex] }
+      let(:data) { { request: "REQUEST", key: "value" } }
+      let(:start_args) { ["start_processing.action_controller", *args, nil] }
+      let(:process_args) { ["process_action.action_controller", *args, data] }
+      let(:deprecation_args) { ["!deprecation.rails", *args, nil] }
 
       before { set_jaeger }
 
       specify "with span and log created" do
-        allow(ActiveSupport::Notifications::Event).to receive(:new).and_return(start_event)
-        allow(ActiveSupport::Notifications::Event).to receive(:new).and_return(process_event)
-
         OpenTracing.start_active_span(self.class.name) do
           ActiveSupport::Notifications.publish(*start_args)
-          ActiveSupport::Notifications.publish(*procces_args)
+          ActiveSupport::Notifications.publish(*process_args)
+          ActiveSupport::Notifications.publish(*deprecation_args)
         end
       end
 
       specify "without span and log not created" do
-        expect(ActiveSupport::Notifications::Event).not_to receive(:new)
-        expect(ActiveSupport::Notifications::Event).not_to receive(:new)
-
         ActiveSupport::Notifications.publish(*start_args)
-        ActiveSupport::Notifications.publish(*procces_args)
+        ActiveSupport::Notifications.publish(*process_args)
+        ActiveSupport::Notifications.publish(*deprecation_args)
       end
     end
 
     specify "set subscribers" do
-      expect(ActiveSupport::Notifications).to receive(:subscribe)
-                                                  .with("process_action.action_controller")
-      expect(ActiveSupport::Notifications).to receive(:subscribe)
-                                                  .with("start_processing.action_controller")
+      expect(ActiveSupport::Notifications).to receive(:subscribe).with(/.*/)
+
       set_jaeger
     end
 
@@ -64,10 +59,10 @@ RSpec.describe JCW::Wrapper do
       let(:subscribe_to) { [] }
 
       specify "subscribers not set" do
-        expect(ActiveSupport::Notifications).not_to receive(:subscribe)
-                                                        .with("process_action.action_controller")
-        expect(ActiveSupport::Notifications).not_to receive(:subscribe)
-                                                        .with("start_processing.action_controller")
+        expect(ActiveSupport::Notifications).not_to \
+          receive(:subscribe).with("process_action.action_controller")
+        expect(ActiveSupport::Notifications).not_to \
+          receive(:subscribe).with("start_processing.action_controller")
         set_jaeger
       end
     end
@@ -120,8 +115,7 @@ RSpec.describe JCW::Wrapper do
         }
         config.enabled = true
         config.flush_interval = 10
-        config.subscribe_to =
-          %w[process_action.action_controller start_processing.action_controller]
+        config.subscribe_to = [/.*/]
         config.tags = {
           hostname: "custom-hostname",
           custom_tag: "custom-tag-value",
