@@ -15,7 +15,9 @@ module JCW
     def add(name, _started, _finished, _unique_id, data)
       # skip Rails internal events
       return if name.start_with?("!")
-      return if (span = OpenTracing.scope_manager.active&.span).blank?
+
+      span = OpenTracing.scope_manager.active&.span
+      return if span.blank?
 
       if data.is_a?(Hash)
         # we should only mutate the copy of the data
