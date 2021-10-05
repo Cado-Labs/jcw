@@ -25,7 +25,7 @@ gem install jcw
 ```
 
 ```ruby
-require 'jcw' 
+require 'jcw'
 ```
 
 ## Usage
@@ -68,17 +68,20 @@ Rails.application.middleware.use(JCW::RackTracer)
 # Not recommended for UDP sender, because default max packet size is 65,000 bytes.
 Rails.application.config.tap do |config|
   config.middleware.use(
-  ::JCW::RackTracer,
-  on_finish_span:
-    -> (span) { ::JCW::JaegerLogger.current.logs.each { |log| span.log_kv(**log) } },
+    JCW::RackTracer,
+    on_finish_span: lambda do |span|
+      JCW::Logger.current.logs.each { |log| span.log_kv(**log) }
+      JCW::Logger.current.clear # Do not forget to avoid memory leaks
+    end,
   )
-  config.logger.extend(::JCW::JaegerLoggerExtension)
+
+  config.logger.extend(JCW::LoggerExtension)
 end
 ```
 - `config.subscribe_to` - not recommended for UDP sender, because default max packet size is 65,000 bytes.
 
 ### Contributing
- 
+
  - Fork it ( https://github.com/Cado-Labs/jcw )
  - Create your feature branch (`git checkout -b feature/my-new-feature`)
  - Commit your changes (`git commit -am '[feature_context] Add some feature'`)
