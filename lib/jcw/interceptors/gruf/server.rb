@@ -7,9 +7,9 @@ module JCW
     module Gruf
       class Server < ::Gruf::Interceptors::ServerInterceptor
 
-        def call(&block)
+        def call
           method = request.method_name
-          return if Wrapper.config.grpc_ignore_methods.include?(method)
+          return yield if Wrapper.config.grpc_ignore_methods.include?(method)
 
           tracer = OpenTracing.global_tracer
           on_finish_span = options.fetch(:on_finish_span, nil)
@@ -35,7 +35,7 @@ module JCW
             current_span = current_scope.span
             current_span.log_kv(event: "request", :'data' => request.message.to_h)
 
-            response = block.call
+            response = yield
 
             if response.try(:error_fields)
               current_span.set_tag("error", true)
