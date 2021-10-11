@@ -8,6 +8,9 @@ module JCW
       class Server < ::Gruf::Interceptors::ServerInterceptor
 
         def call(&block)
+          method = request.method_name
+          return if Wrapper.config.grpc_ignore_methods.include?(method)
+
           tracer = OpenTracing.global_tracer
           on_finish_span = options.fetch(:on_finish_span, nil)
           service_class = request.service
