@@ -23,8 +23,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 5.0"
-  spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "gruf", "~> 2.10"
+  spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "jaeger-client", "~> 1.1.0"
   spec.add_dependency "rack-tracer", "~> 0.9.0"
 

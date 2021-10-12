@@ -19,7 +19,7 @@ RSpec.describe JCW::Interceptors::Gruf::Client do
       requests: requests,
       call: call,
       method: grpc_method,
-      metadata: metadata
+      metadata: metadata,
     )
   end
   let(:type) { :request_response }
@@ -29,9 +29,11 @@ RSpec.describe JCW::Interceptors::Gruf::Client do
   let(:call) { double(:call, output_metadata: {}) }
   let(:grpc_method) { "/rpc.Request" }
   let(:metadata) { { foo: "bar" } }
+  let(:block) { proc { "test" } }
+
+  subject(:client_call) { described_class.new.call(request_context: request_context, &block) }
 
   it "test" do
-    subject { described_class.new.call(request_context: request_context, &block) }
-    expect(subject).to be_truthy
+    expect(client_call).to be_truthy
   end
 end

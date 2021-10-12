@@ -40,20 +40,22 @@ RSpec.describe JCW::Interceptors::Gruf::Server do
 
   describe "#call" do
     block = proc { true }
-    subject { interceptor.new(request, error, {}).call(&block) }
+    subject(:server_call) { interceptor.new(request, error, {}).call(&block) }
 
-    let(:request) { ::Gruf::Controllers::Request.new(
-      method_key: :get_thing,
-      service: TestService,
-      rpc_desc: :description,
-      active_call: RpcTestCall.new,
-      message: Google::Protobuf::DescriptorPool.generated_pool.lookup("rpc.GetThingResponse").msgclass.new)
-    }
+    let(:request) do
+      ::Gruf::Controllers::Request.new(
+        method_key: :get_thing,
+        service: TestService,
+        rpc_desc: :description,
+        active_call: RpcTestCall.new,
+        message: Google::Protobuf::DescriptorPool.generated_pool
+                                                 .lookup("rpc.GetThingResponse").msgclass.new,
+      )
+    end
     let(:error) { Gruf::Error.new }
 
-
     it do
-      expect(subject).to be_truthy
+      expect(server_call).to be_truthy
     end
   end
 end
