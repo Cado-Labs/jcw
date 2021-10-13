@@ -41,9 +41,7 @@ module JCW
               current_span.set_tag("error", true)
               current_span.log_kv(event: "error", data: response.to_h)
             end
-
-            response
-          rescue StandardError => e
+          rescue => e
             if current_span
               current_span.set_tag("error", true)
               current_span.log_kv(event: "error", error_object: e)
@@ -52,6 +50,8 @@ module JCW
           ensure
             on_finish_span&.call(current_span)
             current_scope.close if current_span
+
+            response
           end
         end
         # rubocop:enable Metrics/MethodLength

@@ -2,10 +2,15 @@
 
 require "google/protobuf"
 
-class TestServerInterceptor < ::Gruf::Interceptors::ServerInterceptor
+class TestServerInterceptor < JCW::Interceptors::Gruf::Server
+  def initialize(request, error, options: {})
+    super(request, error, options)
+  end
+
   def call
-    Math.sqrt(4)
-    yield
+    super
+
+    "Test Server Call"
   end
 end
 
@@ -18,8 +23,24 @@ end
 class RpcTestCall
   attr_reader :metadata
 
-  def initialize
-    @metadata = { "authorization" => "Basic #{Base64.encode64('grpc:token')}" }
+  def initialize(metadata_exist: true)
+    @metadata = metadata_exist ? { "uber-trace-id" => "1231:3422:23445:3443" } : {}
+  end
+end
+
+class ErrorResponse
+  def error_fields
+    { some_error: true }
+  end
+
+  def to_h
+    self
+  end
+end
+
+class RescueResponse
+  def error_fields
+    raise StandardError, "Standard Error"
   end
 end
 
@@ -34,13 +55,28 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
 end
 
 RSpec.describe JCW::Interceptors::Gruf::Server do
+  RSpec::Mocks.configuration.allow_message_expectations_on_nil = true
+
+  def set_jaeger
+    ::JCW::Wrapper.configure do |config|
+      config.service_name = "ServiceName"
+      config.connection = connection
+      config.enabled = enabled
+      config.subscribe_to = subscribe_to
+      config.grpc_ignore_methods = grpc_ignore_methods
+    end
+  end
+
+  let(:enabled) { true }
+  let(:connection) { { protocol: :udp, host: "127.0.0.1", port: 6831 } }
+  let(:subscribe_to) { [/.*/] }
+  let(:grpc_ignore_methods) { [] }
+
   let(:interceptor) { TestServerInterceptor }
-  let(:interceptor_args) { {} }
-  let(:interceptors) { { interceptor => interceptor_args } }
 
   describe "#call" do
-    block = proc { true }
-    subject(:server_call) { interceptor.new(request, error, {}).call(&block) }
+    let(:block) { proc { true } }
+    let(:server_call) { interceptor.new(request, error) }
 
     let(:request) do
       ::Gruf::Controllers::Request.new(
@@ -54,8 +90,76 @@ RSpec.describe JCW::Interceptors::Gruf::Server do
     end
     let(:error) { Gruf::Error.new }
 
-    it do
-      expect(server_call).to be_truthy
+    context "without errors" do
+      it do
+        set_jaeger
+        expect(server_call.call(&block)).to eq("Test Server Call")
+      end
+    end
+
+    context "with ignore method" do
+      let(:grpc_ignore_methods) { ["test_service.get_thing"] }
+
+      it do
+        set_jaeger
+        expect(server_call.call(&block)).to eq("Test Server Call")
+      end
+    end
+
+    context "with error response" do
+      it do
+        block = proc { ErrorResponse.new }
+        set_jaeger
+        expect(server_call.call(&block)).to eq("Test Server Call")
+      end
+    end
+
+    context "with rescue response" do
+      it do
+        block = proc { RescueResponse.new }
+        set_jaeger
+        expect { server_call.call(&block) }.to raise_error(StandardError)
+      end
+    end
+
+    context "without current_span" do
+      it do
+        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
+        set_jaeger
+        expect { server_call.call(&block) }.to raise_error(NoMethodError)
+      end
+    end
+
+    context "with on finish span" do
+      let(:server_call) do
+        interceptor.new(request, error, options: { on_finish_span: -> (_) { true } })
+      end
+
+      it do
+        set_jaeger
+        expect(server_call.call(&block)).to eq("Test Server Call")
+      end
+    end
+
+    context "with on finish span and without current_span" do
+      let(:server_call) do
+        interceptor.new(request, error, options: { on_finish_span: -> (_) { true } })
+      end
+
+      it do
+        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
+        set_jaeger
+        expect { server_call.call(&block) }.to raise_error(NoMethodError)
+      end
+    end
+
+    context "without rescue and without current_span" do
+      it do
+        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
+        allow(nil).to receive(:log_kv).and_return(true)
+        set_jaeger
+        expect(server_call.call(&block)).to eq("Test Server Call")
+      end
     end
   end
 end
