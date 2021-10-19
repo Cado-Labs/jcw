@@ -51,6 +51,8 @@ module JCW
             on_finish_span&.call(current_span)
             current_scope.close if current_span
           end
+
+          response
         end
         # rubocop:enable Metrics/MethodLength
       end
