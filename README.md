@@ -95,7 +95,7 @@ Released under MIT License.
 ## Supporting
 
 <a href="https://github.com/Cado-Labs">
-  <img src="https://github.com/Cado-Labs/cado-labs-logos/blob/main/cado_labs_logo.png" alt="Supported by Cado Labs" />
+  <img src="https://github.com/Cado-Labs/cado-labs-resources/blob/main/cado_labs_supporting.svg" alt="Supported by Cado Labs" />
 </a>
 
 ## Authors
