@@ -12,12 +12,11 @@ module JCW
           return yield if Wrapper.config.grpc_ignore_methods.include?(method)
 
           tracer = OpenTracing.global_tracer
-          on_finish_span = options.fetch(:on_finish_span, nil)
+          on_finish_span = options[:on_finish_span]
           service_class = request.service
           method_name = request.method_key
           name = method_name.to_s.camelize
-
-          route = "/#{service_class.service_name}/#{name}".to_sym
+          route = "/#{service_class.service_name}/#{name}"
 
           begin
             tags = {
@@ -28,7 +27,7 @@ module JCW
             hpack_carrier = Hpack.new(request.active_call.metadata)
             parent_span_context = tracer.extract(::OpenTracing::FORMAT_TEXT_MAP, hpack_carrier)
             current_scope = tracer.start_active_span(
-              route.to_s,
+              route,
               child_of: parent_span_context,
               tags: tags,
             )

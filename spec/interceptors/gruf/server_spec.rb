@@ -90,9 +90,10 @@ RSpec.describe JCW::Interceptors::Gruf::Server do
     end
     let(:error) { Gruf::Error.new }
 
+    before { set_jaeger }
+
     context "without errors" do
       it do
-        set_jaeger
         expect(server_call.call(&block)).to eq("Test Server Call")
       end
     end
@@ -101,31 +102,30 @@ RSpec.describe JCW::Interceptors::Gruf::Server do
       let(:grpc_ignore_methods) { ["test_service.get_thing"] }
 
       it do
-        set_jaeger
         expect(server_call.call(&block)).to eq("Test Server Call")
       end
     end
 
     context "with error response" do
+      let(:block) { proc { ErrorResponse.new } }
+
       it do
-        block = proc { ErrorResponse.new }
-        set_jaeger
         expect(server_call.call(&block)).to eq("Test Server Call")
       end
     end
 
     context "with rescue response" do
+      let(:block) { proc { RescueResponse.new } }
+
       it do
-        block = proc { RescueResponse.new }
-        set_jaeger
         expect { server_call.call(&block) }.to raise_error(StandardError)
       end
     end
 
     context "without current_span" do
+      before { allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil) }
+
       it do
-        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
-        set_jaeger
         expect { server_call.call(&block) }.to raise_error(NoMethodError)
       end
     end
@@ -136,28 +136,29 @@ RSpec.describe JCW::Interceptors::Gruf::Server do
       end
 
       it do
-        set_jaeger
         expect(server_call.call(&block)).to eq("Test Server Call")
       end
     end
 
     context "with on finish span and without current_span" do
+      before { allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil) }
+
       let(:server_call) do
         interceptor.new(request, error, options: { on_finish_span: -> (_) { true } })
       end
 
       it do
-        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
-        set_jaeger
         expect { server_call.call(&block) }.to raise_error(NoMethodError)
       end
     end
 
     context "without rescue and without current_span" do
-      it do
+      before do
         allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
         allow(nil).to receive(:log_kv).and_return(true)
-        set_jaeger
+      end
+
+      it do
         expect(server_call.call(&block)).to eq("Test Server Call")
       end
     end

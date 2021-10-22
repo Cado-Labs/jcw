@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jcw (0.1.4)
+    jcw (0.2.0)
       activesupport (>= 5.0)
       gruf (~> 2.10)
       httprb-opentracing (~> 0.4.0)

@@ -23,7 +23,6 @@ module JCW
               event: "request",
               data: request_context.requests.map { |request| request.try(:to_h) },
             )
-            current_span.log_kv(event: "metadata", data: metadata)
             hpack_carrier = Hpack.new(metadata)
             tracer.inject(current_span.context, ::OpenTracing::FORMAT_TEXT_MAP, hpack_carrier)
 
