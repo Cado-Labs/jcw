@@ -80,6 +80,43 @@ end
 ```
 - `config.subscribe_to` - not recommended for UDP sender, because default max packet size is 65,000 bytes.
 
+#### GRPC Integration
+
+Client side
+
+```ruby
+# Add JCW::Interceptors::Gruf::Client Interceptor to Gruf Client Initializer
+options = {}
+client_options = { timeout: 10, interceptors: [JCW::Interceptors::Gruf::Client.new] }
+
+client = Gruf::Client.new(
+  service: Test::Service, options: options, client_options: client_options
+)
+
+request_method = "some_method"
+client.call(request_method)
+```
+
+Server side
+
+```ruby
+# Add Server Interceptor
+Rails.configuration.to_prepare do
+  Gruf.configure do |config|
+    config.interceptors.use(JCW::Interceptors::Gruf::Server)
+  end
+end  
+
+# Configure
+::JCW::Wrapper.configure do |config|
+  config.service_name = "Service Name"
+  config.connection = { protocol: :udp, host: "127.0.0.1", port: 6831 }
+  config.enabled = true
+  config.subscribe_to = [/.*/]
+  config.grpc_ignore_methods = %w[grpc.ignore.method]
+end
+```
+
 ### Contributing
 
  - Fork it ( https://github.com/Cado-Labs/jcw )
