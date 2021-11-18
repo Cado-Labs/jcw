@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Wrapper for the gem 'jaeger-client' with simpler customization."
   spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
