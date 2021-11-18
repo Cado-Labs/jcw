@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jcw (0.2.0)
+    jcw (0.2.1)
       activesupport (>= 5.0)
       gruf (~> 2.10)
       httprb-opentracing (~> 0.4.0)
@@ -50,21 +50,13 @@ GEM
     ffi-compiler (1.0.1)
       ffi (>= 1.0.0)
       rake
-    google-protobuf (3.18.1)
-    google-protobuf (3.18.1-universal-darwin)
-    google-protobuf (3.18.1-x86_64-linux)
-    googleapis-common-protos-types (1.2.0)
+    google-protobuf (3.19.1)
+    googleapis-common-protos-types (1.3.0)
       google-protobuf (~> 3.14)
-    grpc (1.41.0)
+    grpc (1.41.1)
       google-protobuf (~> 3.17)
       googleapis-common-protos-types (~> 1.0)
-    grpc (1.41.0-universal-darwin)
-      google-protobuf (~> 3.17)
-      googleapis-common-protos-types (~> 1.0)
-    grpc (1.41.0-x86_64-linux)
-      google-protobuf (~> 3.17)
-      googleapis-common-protos-types (~> 1.0)
-    grpc-tools (1.41.0)
+    grpc-tools (1.41.1)
     gruf (2.10.0)
       activesupport (> 4)
       concurrent-ruby (> 1)
@@ -91,7 +83,7 @@ GEM
     jaeger-client (1.1.0)
       opentracing (~> 0.3)
       thrift
-    json (2.5.1)
+    json (2.6.1)
     llhttp-ffi (0.3.1)
       ffi-compiler (~> 1.0)
       rake (~> 13.0)
