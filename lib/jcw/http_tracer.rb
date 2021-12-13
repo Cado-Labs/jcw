@@ -31,7 +31,7 @@ module JCW
 
               tracer.start_active_span("http.request", tags: tags) do |scope|
                 request.headers.merge!(options.headers)
-                OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_RACK,
+                OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_TEXT_MAP,
                                    request.headers)
 
                 res = perform_without_tracing(request, options)
