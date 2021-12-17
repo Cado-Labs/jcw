@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "rack/tracer"
+require "opentracing"
 require "jaeger/client"
 require "active_support"
 require "httprb-opentracing"

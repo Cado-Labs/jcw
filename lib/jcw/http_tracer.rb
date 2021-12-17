@@ -17,6 +17,7 @@ module JCW
               host = request.uri.host if request.uri.respond_to?(:host)
               port = request.uri.port if request.uri.respond_to?(:port)
               verb = request.verb.to_s.upcase if request.respond_to?(:verb)
+              full_path = request.uri.to_s
 
               tags = {
                 "component" => "ruby-httprb",
@@ -29,9 +30,10 @@ module JCW
 
               tracer = ::HTTP::Tracer.tracer
 
-              tracer.start_active_span("http.request", tags: tags) do |scope|
+              request_name = "http.request #{verb} #{full_path}"
+              tracer.start_active_span(request_name, tags: tags) do |scope|
                 request.headers.merge!(options.headers)
-                OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_RACK,
+                OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_TEXT_MAP,
                                    request.headers)
 
                 res = perform_without_tracing(request, options)
