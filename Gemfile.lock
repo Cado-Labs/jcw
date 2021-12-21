@@ -1,12 +1,11 @@
 PATH
   remote: .
   specs:
-    jcw (0.2.1)
+    jcw (0.2.2)
       activesupport (>= 5.0)
       gruf (~> 2.10)
       httprb-opentracing (~> 0.4.0)
       jaeger-client (~> 1.1.0)
-      rack-tracer (~> 0.9.0)
 
 GEM
   remote: https://rubygems.org/
@@ -53,10 +52,10 @@ GEM
     google-protobuf (3.19.1)
     googleapis-common-protos-types (1.3.0)
       google-protobuf (~> 3.14)
-    grpc (1.41.1)
-      google-protobuf (~> 3.17)
+    grpc (1.42.0)
+      google-protobuf (~> 3.18)
       googleapis-common-protos-types (~> 1.0)
-    grpc-tools (1.41.1)
+    grpc-tools (1.42.0)
     gruf (2.10.0)
       activesupport (> 4)
       concurrent-ruby (> 1)
@@ -101,6 +100,8 @@ GEM
     nokogiri (1.12.5-x86_64-linux)
       racc (~> 1.4)
     opentracing (0.5.0)
+    opentracing_test_tracer (0.1.1)
+      opentracing
     parallel (1.20.1)
     parser (3.0.2.0)
       ast (~> 2.4.1)
@@ -112,8 +113,6 @@ GEM
     rack (2.2.3)
     rack-test (1.1.0)
       rack (>= 1.0, < 3)
-    rack-tracer (0.9.0)
-      opentracing (~> 0.4)
     rails-dom-testing (2.0.3)
       activesupport (>= 4.2.0)
       nokogiri (>= 1.6)
@@ -206,6 +205,7 @@ DEPENDENCIES
   http
   http-parser
   jcw!
+  opentracing_test_tracer
   pry
   railties
   rake
