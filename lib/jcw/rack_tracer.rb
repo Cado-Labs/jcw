@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# inspired https://github.com/opentracing-contrib/ruby-rack-tracer/blob/master/lib/rack/tracer.rb
 module JCW
   module Rack
     class Tracer
