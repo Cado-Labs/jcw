@@ -3,9 +3,9 @@
 module JCW
   module Rack
     class Tracer
-      REQUEST_URI = 'REQUEST_URI'.freeze
-      REQUEST_PATH = 'REQUEST_PATH'.freeze
-      REQUEST_METHOD = 'REQUEST_METHOD'.freeze
+      REQUEST_URI = "REQUEST_URI"
+      REQUEST_PATH = "REQUEST_PATH"
+      REQUEST_METHOD = "REQUEST_METHOD"
 
       # Create a new Rack Tracer middleware.
       #
@@ -41,7 +41,7 @@ module JCW
         return @app.call(env) if @ignore_paths.include?(path)
 
         handle_error(@errors) do
-          env['uber-trace-id'] = env['HTTP_UBER_TRACE_ID']
+          env["uber-trace-id"] = env["HTTP_UBER_TRACE_ID"]
           context = @tracer.extract(OpenTracing::FORMAT_TEXT_MAP, env) if @trust_incoming_span
           @scope = build_scope(method, url, context)
           @span = @scope.span
@@ -59,20 +59,20 @@ module JCW
       def handle_error(errors)
         yield
       rescue *errors => e
-        @span.set_tag('error', true)
+        @span.set_tag("error", true)
         @span.log_kv(
-          event: 'error',
-          :'error.kind' => e.class.to_s,
-          :'error.object' => e,
+          event: "error",
+          "error.kind": e.class.to_s,
+          "error.object": e,
           message: e.message,
-          stack: e.backtrace.join("\n")
+          stack: e.backtrace.join("\n"),
         )
         raise
       ensure
         begin
           @scope.close
         ensure
-          @on_finish_span.call(@span) if @on_finish_span
+          perform_on_finish_span
         end
       end
 
@@ -81,31 +81,32 @@ module JCW
           method,
           child_of: context,
           tags: {
-            'component' => 'rack',
-            'span.kind' => 'server',
-            'http.method' => method,
-            'http.url' => url
-          }
+            "component" => "rack",
+            "span.kind" => "server",
+            "http.method" => method,
+            "http.url" => url,
+          },
         )
       end
 
       def perform_on_start_span(env, span, on_start_span)
-        @on_start_span.call(@span) if @on_start_span
-        env['rack.span'] = @span
+        on_start_span&.call(span)
+        env["rack.span"] = span
       end
 
       def set_tag(span, status_code, env)
-        span.set_tag('http.status_code', status_code)
+        span.set_tag("http.status_code", status_code)
         route = route_from_env(env)
         span.operation_name = route if route
       end
 
       def route_from_env(env)
-        if (sinatra_route = env['sinatra.route'])
+        if (sinatra_route = env["sinatra.route"])
           sinatra_route
-        elsif (rails_controller = env['action_controller.instance'])
-          "#{env[REQUEST_METHOD]} #{rails_controller.controller_name}/#{rails_controller.action_name}"
-        elsif (grape_route_args = env['grape.routing_args'] || env['rack.routing_args'])
+        elsif (rails_controller = env["action_controller.instance"])
+          method = env[REQUEST_METHOD]
+          "#{method} #{rails_controller.controller_name}/#{rails_controller.action_name}"
+        elsif (grape_route_args = env["grape.routing_args"] || env["rack.routing_args"])
           grape_route_from_args(grape_route_args)
         end
       end
@@ -117,6 +118,11 @@ module JCW
         elsif (rack_route_options = route_info.instance_variable_get(:@options))
           rack_route_options[:path]
         end
+      end
+
+      def perform_on_finish_span
+        return unless @on_finish_span
+        @on_finish_span.call(@span)
       end
     end
   end

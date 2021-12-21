@@ -42,10 +42,11 @@ UDP Sender(default):
     hostname: "custom-hostname",
     custom_tag: "custom-tag-value",
   }
+  config.rack_ignore_paths = %w[/api/test]
 end
 
-# Set middleware for wrapping all requests(gem RackTracer)
-Rails.application.middleware.use(JCW::RackTracer)
+# Set middleware for wrapping all requests
+Rails.application.middleware.use(JCW::Rack::Tracer)
 ```
 
 TCP Sender:
@@ -59,16 +60,17 @@ TCP Sender:
     hostname: "custom-hostname",
     custom_tag: "custom-tag-value",
   }
+  config.rack_ignore_paths = %w[/api/test]
 end
 
 # Set middleware for wrapping all requests
-Rails.application.middleware.use(JCW::RackTracer)
+Rails.application.middleware.use(JCW::Rack::Tracer)
 
 # If you need send all logs with spans set on_finish_span and extend JaegerLoggerExtension
 # Not recommended for UDP sender, because default max packet size is 65,000 bytes.
 Rails.application.config.tap do |config|
   config.middleware.use(
-    JCW::RackTracer,
+    JCW::Rack::Tracer,
     on_finish_span: lambda do |span|
       JCW::Logger.current.logs.each { |log| span.log_kv(**log) }
       JCW::Logger.current.clear # Do not forget to avoid memory leaks
