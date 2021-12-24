@@ -74,7 +74,7 @@ RSpec.describe JCW::Rack::Tracer do
       let(:route) { "POST /users/:id" }
 
       before do
-        env["grape.routing_args"] = { route_info: double(path: route) }
+        env["grape.routing_args"] = { route_info: double(path: "/users/:id") }
       end
 
       it "adds the route path to operation name" do
@@ -89,7 +89,7 @@ RSpec.describe JCW::Rack::Tracer do
       let(:route_info) { RouteInfo.new }
 
       before do
-        route_info.options = { path: route }
+        route_info.options = { path: "/users/:id" }
         env["rack.routing_args"] = { route_info: route_info }
       end
 
@@ -100,7 +100,7 @@ RSpec.describe JCW::Rack::Tracer do
       end
 
       context "when route_info.options is nil" do
-        let(:route) { "POST" }
+        let(:route) { "POST " }
 
         before do
           route_info.options = nil
