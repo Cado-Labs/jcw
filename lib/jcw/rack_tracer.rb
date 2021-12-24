@@ -102,13 +102,13 @@ module JCW
       end
 
       def route_from_env(env)
+        method = env[REQUEST_METHOD]
         if (sinatra_route = env["sinatra.route"])
           sinatra_route
         elsif (rails_controller = env["action_controller.instance"])
-          method = env[REQUEST_METHOD]
           "#{method} #{rails_controller.controller_name}/#{rails_controller.action_name}"
         elsif (grape_route_args = env["grape.routing_args"] || env["rack.routing_args"])
-          grape_route_from_args(grape_route_args)
+          "#{method} #{grape_route_from_args(grape_route_args)}"
         end
       end
 
