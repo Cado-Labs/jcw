@@ -22,16 +22,16 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "activesupport", ">= 5.0"
+  spec.add_dependency "activesupport", ">= 5.0", "< 7.0.0"
   spec.add_dependency "gruf", "~> 2.10"
   spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "jaeger-client", "~> 1.1.0"
-  spec.add_dependency "rack-tracer", "~> 0.9.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "http"
   spec.add_development_dependency "http-parser"
+  spec.add_development_dependency "opentracing_test_tracer"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "railties"
   spec.add_development_dependency "rake"
@@ -39,4 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-config-umbrellio"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-lcov"
+  spec.metadata = {
+    "rubygems_mfa_required" => "true",
+  }
 end

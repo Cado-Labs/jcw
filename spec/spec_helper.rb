@@ -26,6 +26,8 @@ require "bundler/setup"
 require "jcw"
 require "pry"
 require "test_rails_app"
+require "rack/mock"
+require "opentracing_test_tracer"
 
 RSpec.configure do |config|
   Kernel.srand config.seed
