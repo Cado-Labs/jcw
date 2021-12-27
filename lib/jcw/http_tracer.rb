@@ -26,11 +26,12 @@ module JCW
                 "http.url" => path,
                 "peer.host" => host,
                 "peer.port" => port,
+                "full_path" => full_path,
               }.compact
 
               tracer = ::HTTP::Tracer.tracer
 
-              request_name = "http.request #{verb} #{full_path}"
+              request_name = "http.request #{verb} #{path}"
               tracer.start_active_span(request_name, tags: tags) do |scope|
                 request.headers.merge!(options.headers)
                 OpenTracing.inject(scope.span.context, OpenTracing::FORMAT_TEXT_MAP,
