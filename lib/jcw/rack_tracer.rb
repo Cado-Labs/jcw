@@ -41,40 +41,30 @@ module JCW
 
         return @app.call(env) if @ignore_paths.include?(path)
 
-        handle_error(@errors) do
-          env["uber-trace-id"] = env["HTTP_UBER_TRACE_ID"]
-          context = @tracer.extract(OpenTracing::FORMAT_TEXT_MAP, env) if @trust_incoming_span
-          @scope = build_scope(method, url, context)
-          @span = @scope.span
+        set_extract_env(env)
+        context = @tracer.extract(OpenTracing::FORMAT_TEXT_MAP, env) if @trust_incoming_span
+        scope = build_scope(method, url, context)
+        span = scope.span
+        perform_on_start_span(env, span, @on_start_span)
 
-          perform_on_start_span(env, @span, @on_start_span)
-
-          @app.call(env).tap do |status_code, _headers, _body|
-            set_tag(@span, status_code, env)
-          end
+        @app.call(env).tap do |status_code, _headers, _body|
+          set_tag(span, status_code, env)
+        end
+      rescue *@errors => error
+        build_error_log(span, error)
+        raise
+      ensure
+        begin
+          close_scope(scope)
+        ensure
+          perform_on_finish_span(span)
         end
       end
 
       private
 
-      def handle_error(errors)
-        yield
-      rescue *errors => e
-        @span.set_tag("error", true)
-        @span.log_kv(
-          event: "error",
-          "error.kind": e.class.to_s,
-          "error.object": e,
-          message: e.message,
-          stack: e.backtrace.join("\n"),
-        )
-        raise
-      ensure
-        begin
-          @scope.close
-        ensure
-          perform_on_finish_span
-        end
+      def set_extract_env(env)
+        env["uber-trace-id"] = env["HTTP_UBER_TRACE_ID"]
       end
 
       def build_scope(method, url, context)
@@ -98,7 +88,7 @@ module JCW
       def set_tag(span, status_code, env)
         span.set_tag("http.status_code", status_code)
         route = route_from_env(env)
-        span.operation_name = route if route
+        span.operation_name = route
       end
 
       def route_from_env(env)
@@ -109,6 +99,8 @@ module JCW
           "#{method} #{rails_controller.controller_name}/#{rails_controller.action_name}"
         elsif (grape_route_args = env["grape.routing_args"] || env["rack.routing_args"])
           "#{method} #{grape_route_from_args(grape_route_args)}"
+        else
+          "#{method} #{env[REQUEST_PATH]}".strip
         end
       end
 
@@ -121,9 +113,24 @@ module JCW
         end
       end
 
-      def perform_on_finish_span
+      def build_error_log(span, error)
+        span.set_tag("error", true)
+        span.log_kv(
+          event: "error",
+          "error.kind": error.class.to_s,
+          "error.object": error,
+          message: error.message,
+          stack: error.backtrace.join("\n"),
+        )
+      end
+
+      def perform_on_finish_span(span)
         return unless @on_finish_span
-        @on_finish_span.call(@span)
+        @on_finish_span.call(span)
+      end
+
+      def close_scope(scope)
+        scope.close if scope
       end
     end
   end
