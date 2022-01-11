@@ -38,7 +38,6 @@ module JCW
         method = env[REQUEST_METHOD]
         path = env[REQUEST_PATH]
         url = env[REQUEST_URI]
-
         return @app.call(env) if @ignore_paths.include?(path)
 
         set_extract_env(env)
@@ -46,10 +45,7 @@ module JCW
         scope = build_scope(method, url, context)
         span = scope.span
         perform_on_start_span(env, span, @on_start_span)
-
-        @app.call(env).tap do |status_code, _headers, _body|
-          set_tag(span, status_code, env)
-        end
+        call_request(env, span)
       rescue *@errors => error
         build_error_log(span, error)
         raise
@@ -83,6 +79,12 @@ module JCW
       def perform_on_start_span(env, span, on_start_span)
         on_start_span&.call(span)
         env["rack.span"] = span
+      end
+
+      def call_request(env, span)
+        @app.call(env).tap do |status_code, _headers, _body|
+          set_tag(span, status_code, env)
+        end
       end
 
       def set_tag(span, status_code, env)
@@ -130,7 +132,7 @@ module JCW
       end
 
       def close_scope(scope)
-        scope.close if scope
+        scope&.close
       end
     end
   end
