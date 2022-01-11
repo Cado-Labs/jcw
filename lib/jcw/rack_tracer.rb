@@ -100,7 +100,7 @@ module JCW
         elsif (grape_route_args = env["grape.routing_args"] || env["rack.routing_args"])
           "#{method} #{grape_route_from_args(grape_route_args)}"
         else
-          "#{method} #{env[REQUEST_PATH]}".strip
+          "#{method} #{env[REQUEST_PATH] || env["SCRIPT_NAME"] || env["PATH_INFO"]}".strip
         end
       end
 
