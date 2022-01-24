@@ -120,7 +120,8 @@ RSpec.describe JCW::Rack::Tracer do
 
     before do
       env["REQUEST_PATH"] = "/api/test"
-      allow(JCW::Wrapper.config).to receive(:rack_ignore_path_patterns).and_return(ignore_path_patterns)
+      allow(JCW::Wrapper.config)
+        .to receive(:rack_ignore_path_patterns).and_return(ignore_path_patterns)
     end
 
     context "when path passed" do
