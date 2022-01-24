@@ -42,7 +42,7 @@ UDP Sender(default):
     hostname: "custom-hostname",
     custom_tag: "custom-tag-value",
   }
-  config.rack_ignore_paths = %w[/api/test]
+  config.rack_ignore_path_patterns = ["/api/test", %r{/sidekiq}]
 end
 
 # Set middleware for wrapping all requests
@@ -60,7 +60,7 @@ TCP Sender:
     hostname: "custom-hostname",
     custom_tag: "custom-tag-value",
   }
-  config.rack_ignore_paths = %w[/api/test]
+  config.rack_ignore_path_patterns = ["/api/test", %r{/sidekiq}]
 end
 
 # Set middleware for wrapping all requests
