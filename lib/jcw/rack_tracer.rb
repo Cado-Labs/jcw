@@ -38,7 +38,8 @@ module JCW
         method = env[REQUEST_METHOD]
         path = env[REQUEST_PATH]
         url = env[REQUEST_URI]
-        return @app.call(env) if @ignore_paths.include?(path)
+
+        return @app.call(env) if @ignore_paths.find { |p| p === path }
 
         set_extract_env(env)
         context = @tracer.extract(OpenTracing::FORMAT_TEXT_MAP, env) if @trust_incoming_span
