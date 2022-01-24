@@ -12,7 +12,7 @@ RSpec.describe JCW::Wrapper do
         hostname: "custom-hostname",
         custom_tag: "custom-tag-value",
       }
-      config.rack_ignore_paths = []
+      config.rack_ignore_path_patterns = []
     end
   end
 
@@ -117,7 +117,7 @@ RSpec.describe JCW::Wrapper do
           hostname: "custom-hostname",
           custom_tag: "custom-tag-value",
         }
-        config.rack_ignore_paths = []
+        config.rack_ignore_path_patterns = []
       end
     end
 
