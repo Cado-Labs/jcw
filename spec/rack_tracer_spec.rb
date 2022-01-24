@@ -117,15 +117,43 @@ RSpec.describe JCW::Rack::Tracer do
   end
 
   context "when path in ignore path list" do
-    before do
-      env["REQUEST_PATH"] = "/api/test"
-      allow(JCW::Wrapper.config).to receive(:rack_ignore_paths).and_return(%w[/api/test])
+    context "when path passed" do
+      before do
+        env["REQUEST_PATH"] = "/api/foo"
+        allow(JCW::Wrapper.config).to receive(:rack_ignore_paths).and_return(["/api/test", %r{bar}])
+      end
+
+      it "create new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(1)
+      end
     end
 
-    it "skip creating new trace" do
-      respond_with { ok_response }
+    context "when ignore path is string" do
+      before do
+        env["REQUEST_PATH"] = "/api/test"
+        allow(JCW::Wrapper.config).to receive(:rack_ignore_paths).and_return(%w[/api/test])
+      end
 
-      expect(tracer.spans.count).to eq(0)
+      it "skip creating new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(0)
+      end
+    end
+
+    context "when ignore path is regexp" do
+      before do
+        env["REQUEST_PATH"] = "/api/test"
+        allow(JCW::Wrapper.config).to receive(:rack_ignore_paths).and_return([%r{/api}])
+      end
+
+      it "skip creating new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(0)
+      end
     end
   end
 
