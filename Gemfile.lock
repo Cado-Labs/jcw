@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jcw (0.2.3)
+    jcw (0.3.0)
       activesupport (>= 5.0, < 7.0.0)
       gruf (~> 2.10)
       httprb-opentracing (~> 0.4.0)
@@ -49,10 +49,18 @@ GEM
     ffi-compiler (1.0.1)
       ffi (>= 1.0.0)
       rake
-    google-protobuf (3.19.2)
+    google-protobuf (3.19.3)
+    google-protobuf (3.19.3-x86_64-darwin)
+    google-protobuf (3.19.3-x86_64-linux)
     googleapis-common-protos-types (1.3.0)
       google-protobuf (~> 3.14)
     grpc (1.41.0)
+      google-protobuf (~> 3.17)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.41.0-universal-darwin)
+      google-protobuf (~> 3.17)
+      googleapis-common-protos-types (~> 1.0)
+    grpc (1.41.0-x86_64-linux)
       google-protobuf (~> 3.17)
       googleapis-common-protos-types (~> 1.0)
     grpc-tools (1.41.0)
@@ -215,4 +223,4 @@ DEPENDENCIES
   simplecov-lcov
 
 BUNDLED WITH
-   2.2.15
+   2.2.27
