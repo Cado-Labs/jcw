@@ -9,7 +9,7 @@ module JCW
                 :flush_interval,
                 :tags,
                 :grpc_ignore_methods,
-                :rack_ignore_paths
+                :rack_ignore_path_patterns
 
     def enabled
       @enabled ||= false
@@ -41,8 +41,8 @@ module JCW
       @grpc_ignore_methods ||= []
     end
 
-    def rack_ignore_paths
-      @rack_ignore_paths ||= []
+    def rack_ignore_path_patterns
+      @rack_ignore_path_patterns ||= []
     end
   end
 end

@@ -10,7 +10,6 @@ RSpec.describe JCW::Rack::Tracer do
   let(:tracer) { OpenTracingTestTracer.build }
   let(:on_start_span) { spy }
   let(:on_finish_span) { spy }
-  let(:ignore_paths) { [] }
 
   let(:ok_response) { [200, { "Content-Type" => "application/json" }, ['{"ok": true}']] }
 
@@ -117,15 +116,42 @@ RSpec.describe JCW::Rack::Tracer do
   end
 
   context "when path in ignore path list" do
+    let(:ignore_path_patterns) { [] }
+
     before do
       env["REQUEST_PATH"] = "/api/test"
-      allow(JCW::Wrapper.config).to receive(:rack_ignore_paths).and_return(%w[/api/test])
+      allow(JCW::Wrapper.config)
+        .to receive(:rack_ignore_path_patterns).and_return(ignore_path_patterns)
     end
 
-    it "skip creating new trace" do
-      respond_with { ok_response }
+    context "when path passed" do
+      let(:ignore_path_patterns) { ["/api/foo", %r{/bar}] }
 
-      expect(tracer.spans.count).to eq(0)
+      it "create new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(1)
+      end
+    end
+
+    context "when ignore path is string" do
+      let(:ignore_path_patterns) { %w[/api/test] }
+
+      it "skip creating new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(0)
+      end
+    end
+
+    context "when ignore path is regexp" do
+      let(:ignore_path_patterns) { [%r{/api}] }
+
+      it "skip creating new trace" do
+        respond_with { ok_response }
+
+        expect(tracer.spans.count).to eq(0)
+      end
     end
   end
 

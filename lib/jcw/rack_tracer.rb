@@ -15,7 +15,7 @@ module JCW
       #        is called.
       # @param on_start_span [Proc, nil] A callback evaluated after a new span is created.
       # @param on_finish_span [Proc, nil] A callback evaluated after a span is finished.
-      # @param ignore_paths [Array<Class>] An array of paths to be skiped by the tracer.
+      # @param ignore_path_patterns [Array<Class>] An array of paths to be skiped by the tracer.
       # @param errors [Array<Class>] An array of error classes to be captured by the tracer
       #        as errors. Errors are **not** muted by the middleware, they're re-raised afterwards.
       def initialize(app, # rubocop:disable Metrics/ParameterLists
@@ -23,7 +23,7 @@ module JCW
                      on_start_span: nil,
                      on_finish_span: nil,
                      trust_incoming_span: true,
-                     ignore_paths: Wrapper.config.rack_ignore_paths,
+                     ignore_path_patterns: Wrapper.config.rack_ignore_path_patterns,
                      errors: [StandardError])
         @app = app
         @tracer = tracer
@@ -31,14 +31,15 @@ module JCW
         @on_finish_span = on_finish_span
         @trust_incoming_span = trust_incoming_span
         @errors = errors
-        @ignore_paths = ignore_paths
+        @ignore_path_patterns = ignore_path_patterns
       end
 
       def call(env)
         method = env[REQUEST_METHOD]
         path = env[REQUEST_PATH]
         url = env[REQUEST_URI]
-        return @app.call(env) if @ignore_paths.include?(path)
+
+        return @app.call(env) if @ignore_path_patterns.find { |pattern| pattern === path }
 
         set_extract_env(env)
         context = @tracer.extract(OpenTracing::FORMAT_TEXT_MAP, env) if @trust_incoming_span
