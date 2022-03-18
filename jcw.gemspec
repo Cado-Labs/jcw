@@ -23,12 +23,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 5.0", "< 7.0.0"
-  spec.add_dependency "gruf", "~> 2.10"
   spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "jaeger-client", "~> 1.1.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
+  spec.add_development_dependency "gruf"
   spec.add_development_dependency "http"
   spec.add_development_dependency "http-parser"
   spec.add_development_dependency "opentracing_test_tracer"
@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rubocop-config-umbrellio"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-lcov"
+
   spec.metadata = {
     "rubygems_mfa_required" => "true",
   }

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "gruf"
-
 module JCW
   module Interceptors
     module Gruf
