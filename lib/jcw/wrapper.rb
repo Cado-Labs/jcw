@@ -31,5 +31,4 @@ begin
   require_relative "interceptors/gruf/server"
   require_relative "interceptors/gruf/hpack"
 rescue LoadError
-  :noop
 end
