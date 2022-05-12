@@ -10,6 +10,7 @@ module JCW
                 :tags,
                 :grpc_ignore_methods,
                 :rack_ignore_path_patterns
+                :logger
 
     def enabled
       @enabled ||= false
@@ -43,6 +44,10 @@ module JCW
 
     def rack_ignore_path_patterns
       @rack_ignore_path_patterns ||= []
+    end
+
+    def logger
+      @logger||= ::Logger.new($stdout)
     end
   end
 end
