@@ -9,7 +9,7 @@ module JCW
                 :flush_interval,
                 :tags,
                 :grpc_ignore_methods,
-                :rack_ignore_path_patterns
+                :rack_ignore_path_patterns,
                 :logger
 
     def enabled
@@ -47,7 +47,7 @@ module JCW
     end
 
     def logger
-      @logger||= ::Logger.new($stdout)
+      @logger ||= ::Logger.new($stdout)
     end
   end
 end
