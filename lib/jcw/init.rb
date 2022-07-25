@@ -34,6 +34,7 @@ module JCW
             encoder: Jaeger::Encoders::ThriftEncoder.new(
               service_name: config.service_name,
               tags: config.tags,
+              logger: config.logger,
             ),
           ),
           flush_interval: config.flush_interval,

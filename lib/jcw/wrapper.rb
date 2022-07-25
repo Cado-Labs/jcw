@@ -21,8 +21,14 @@ require_relative "init"
 require_relative "subscriber"
 require_relative "http_tracer"
 require_relative "rack_tracer"
-require_relative "interceptors/gruf/client"
-require_relative "interceptors/gruf/server"
-require_relative "interceptors/gruf/hpack"
 require_relative "logger"
 require_relative "logger_extension"
+
+begin
+  require "gruf"
+
+  require_relative "interceptors/gruf/client"
+  require_relative "interceptors/gruf/server"
+  require_relative "interceptors/gruf/hpack"
+rescue LoadError
+end
