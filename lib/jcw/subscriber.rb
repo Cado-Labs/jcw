@@ -7,12 +7,12 @@ module JCW
     IGNORED_PAYLOAD_KEYS = %i[request response headers exception exception_object].freeze
 
     def subscribe_to_event!(event)
-      ActiveSupport::Notifications.subscribe(event) do |name, _start, _finish, _uid, payload|
-        add(name, payload)
+      ActiveSupport::Notifications.subscribe(event) do |name, start, finish, _uid, payload|
+        add(name, payload, finish - start)
       end
     end
 
-    def add(name, payload)
+    def add(name, payload, duration)
       # skip Rails internal events
       return if name.start_with?("!")
 
@@ -25,7 +25,8 @@ module JCW
         IGNORED_PAYLOAD_KEYS.each { |key| payload.delete(key) if payload.key?(key) }
       end
 
-      span.log_kv(message: name, context: JSON.dump(payload))
+      duration = format("%0.3fms", duration * 1000)
+      span.log_kv(message: name, context: JSON.dump(payload), duration: duration)
     end
   end
 end

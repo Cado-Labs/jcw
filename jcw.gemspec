@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description   = "Wrapper for the gem 'jaeger-client' with simpler customization."
   spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"
-  spec.required_ruby_version = Gem::Requirement.new(">= 2.6.0")
+  spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
 
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
@@ -23,12 +23,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 5.0"
-  spec.add_dependency "gruf"
   spec.add_dependency "httprb-opentracing", "~> 0.4.0"
-  spec.add_dependency "jaeger-client", "~> 1.1.0"
+  spec.add_dependency "jaeger-client", "~> 1.3.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
+  spec.add_development_dependency "gruf"
   spec.add_development_dependency "http"
   spec.add_development_dependency "http-parser"
   spec.add_development_dependency "opentracing_test_tracer"
