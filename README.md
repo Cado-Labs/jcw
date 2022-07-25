@@ -43,6 +43,7 @@ UDP Sender(default):
     custom_tag: "custom-tag-value",
   }
   config.rack_ignore_path_patterns = ["/api/test", %r{/sidekiq}]
+  config.logger = Logger.new($stdout)
 end
 
 # Set middleware for wrapping all requests
@@ -61,6 +62,7 @@ TCP Sender:
     custom_tag: "custom-tag-value",
   }
   config.rack_ignore_path_patterns = ["/api/test", %r{/sidekiq}]
+  config.logger = Logger.new($stdout)
 end
 
 # Set middleware for wrapping all requests
