@@ -23,12 +23,9 @@ module JCW
         # we should only mutate the copy of the payload
         payload = payload.dup
         IGNORED_PAYLOAD_KEYS.each { |key| payload.delete(key) if payload.key?(key) }
-      else
-        payload = { payload: payload }
       end
-      payload[:duration] = duration
 
-      span.log_kv(message: name, context: JSON.dump(payload))
+      span.log_kv(message: name, context: JSON.dump(payload), duration: duration)
     end
   end
 end
