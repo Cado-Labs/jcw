@@ -25,7 +25,7 @@ module JCW
         IGNORED_PAYLOAD_KEYS.each { |key| payload.delete(key) if payload.key?(key) }
       end
 
-      span.log_kv(message: name, context: JSON.dump(payload), duration: duration)
+      span.log_kv(message: name, context: JSON.dump(payload), duration: sprintf("%0.3fms", duration * 1000))
     end
   end
 end
