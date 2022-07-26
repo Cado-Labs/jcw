@@ -3,7 +3,7 @@
 RSpec.describe ::JCW::Logger do
   before do
     make_basic_app
-    Rails.application.config.logger.extend(::JCW::LoggerExtension)
+    Rails.logger.extend(::JCW::LoggerExtension)
   end
 
   before do
