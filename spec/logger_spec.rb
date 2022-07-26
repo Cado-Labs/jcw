@@ -1,9 +1,14 @@
 # frozen_string_literal: true
 
+require "rails"
+
+class TestApp < Rails::Application
+end
+
 RSpec.describe ::JCW::Logger do
   before do
-    make_basic_app
-    Rails.application.config.logger.extend(::JCW::LoggerExtension)
+    Rails.logger = Logger.new(IO::NULL)
+    Rails.logger.extend(::JCW::LoggerExtension)
   end
 
   before do
