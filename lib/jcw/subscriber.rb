@@ -7,7 +7,7 @@ module JCW
     IGNORED_PAYLOAD_KEYS = %i[request response headers exception exception_object].freeze
 
     def subscribe_to_event!(event)
-      ActiveSupport::Notifications.subscribe(event) do |name, start, finish, _uid, payload|
+      ActiveSupport::Notifications.monotonic_subscribe(event) do |name, start, finish, _id, payload|
         add(name, payload, finish - start)
       end
     end
