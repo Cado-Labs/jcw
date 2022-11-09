@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "google/protobuf"
-
 class TestServerInterceptor < JCW::Interceptors::Gruf::Server
   def initialize(request, error, options: {})
     super(request, error, options)
@@ -23,24 +21,8 @@ end
 class RpcTestCall
   attr_reader :metadata
 
-  def initialize(metadata_exist: true)
-    @metadata = metadata_exist ? { "uber-trace-id" => "1231:3422:23445:3443" } : {}
-  end
-end
-
-class ErrorResponse
-  def error_fields
-    { some_error: true }
-  end
-
-  def to_h
-    self
-  end
-end
-
-class RescueResponse
-  def error_fields
-    raise StandardError, "Standard Error"
+  def initialize(parent: nil)
+    @metadata = parent ? { "traceparent" => parent } : {}
   end
 end
 
@@ -55,111 +37,84 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
 end
 
 RSpec.describe JCW::Interceptors::Gruf::Server do
-  RSpec::Mocks.configuration.allow_message_expectations_on_nil = true
-
-  def set_jaeger
-    ::JCW::Wrapper.configure do |config|
-      config.service_name = "ServiceName"
-      config.connection = connection
-      config.enabled = enabled
-      config.subscribe_to = subscribe_to
-      config.grpc_ignore_methods = grpc_ignore_methods
-    end
+  before do
+    exporter.reset
   end
 
-  let(:enabled) { true }
-  let(:connection) { { protocol: :udp, host: "127.0.0.1", port: 6831 } }
-  let(:subscribe_to) { [/.*/] }
-  let(:grpc_ignore_methods) { [] }
-
+  let(:exporter) { EXPORTER }
+  let(:instrumentation) { OpenTelemetry.tracer_provider.tracer("gruf") }
+  let(:span) { exporter.finished_spans.first }
   let(:interceptor) { TestServerInterceptor }
 
   describe "#call" do
     let(:block) { proc { true } }
-    let(:server_call) { interceptor.new(request, error) }
+    let(:server_call) { interceptor.new(request, Gruf::Error.new) }
+    let(:active_call) { RpcTestCall.new }
 
     let(:request) do
       ::Gruf::Controllers::Request.new(
         method_key: :get_thing,
         service: TestService,
         rpc_desc: :description,
-        active_call: RpcTestCall.new,
+        active_call: active_call,
         message: Google::Protobuf::DescriptorPool.generated_pool
                                                  .lookup("rpc.GetThingResponse").msgclass.new,
       )
     end
-    let(:error) { Gruf::Error.new }
-
-    before { set_jaeger }
 
     context "without errors" do
       it do
         expect(server_call.call(&block)).to eq("Test Server Call")
+        expect(exporter.finished_spans.size).to eq(1)
+        expect(span.attributes["component"]).to eq("gRPC")
+        expect(span.attributes["span.kind"]).to eq("server")
+        expect(span.attributes["grpc.method_type"]).to eq("request_response")
       end
     end
 
     context "with ignore method" do
-      let(:grpc_ignore_methods) { ["test_service.get_thing"] }
+      before do
+        ::JCW::Wrapper.configure do |config|
+          config.grpc_ignore_methods = ["test_service.get_thing"]
+        end
+      end
+
+      after do
+        ::JCW::Wrapper.configure do |config|
+          config.grpc_ignore_methods = []
+        end
+      end
 
       it do
         expect(server_call.call(&block)).to eq("Test Server Call")
+        expect(exporter.finished_spans.size).to eq(0)
       end
     end
 
     context "with error response" do
-      let(:block) { proc { ErrorResponse.new } }
+      let(:block) { proc { raise "Invalid response" } }
 
       it do
-        expect(server_call.call(&block)).to eq("Test Server Call")
+        expect { server_call.call(&block) }.to raise_error(RuntimeError, "Invalid response")
+        expect(exporter.finished_spans.size).to eq(1)
       end
     end
 
-    context "with rescue response" do
-      let(:block) { proc { RescueResponse.new } }
-
-      it do
-        expect { server_call.call(&block) }.to raise_error(StandardError)
-      end
-    end
-
-    context "without current_span" do
-      before { allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil) }
-
-      it do
-        expect { server_call.call(&block) }.to raise_error(NoMethodError)
-      end
-    end
-
-    context "with on finish span" do
-      let(:server_call) do
-        interceptor.new(request, error, options: { on_finish_span: -> (_) { true } })
-      end
-
-      it do
-        expect(server_call.call(&block)).to eq("Test Server Call")
-      end
-    end
-
-    context "with on finish span and without current_span" do
-      before { allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil) }
-
-      let(:server_call) do
-        interceptor.new(request, error, options: { on_finish_span: -> (_) { true } })
-      end
-
-      it do
-        expect { server_call.call(&block) }.to raise_error(NoMethodError)
-      end
-    end
-
-    context "without rescue and without current_span" do
+    context "with parent span" do
       before do
-        allow_any_instance_of(Jaeger::Scope).to receive(:span).and_return(nil)
-        allow(nil).to receive(:log_kv).and_return(true)
+        span = instrumentation.start_span("operation-name")
+        span.finish
       end
+
+      let(:span) { exporter.finished_spans.last }
+      let(:parent_span) { exporter.finished_spans.first }
+      let(:parent_span_id) { "00-#{parent_span.hex_trace_id}-#{parent_span.hex_span_id}-01" }
+      let(:active_call) { RpcTestCall.new(parent: parent_span_id) }
 
       it do
         expect(server_call.call(&block)).to eq("Test Server Call")
+        expect(exporter.finished_spans.size).to eq(2)
+        expect(span.hex_trace_id).to eq(parent_span.hex_trace_id)
       end
     end
   end

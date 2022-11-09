@@ -7,51 +7,38 @@ module JCW
         # rubocop:disable Metrics/MethodLength
         def call
           method = request.method_name
-          return yield if Wrapper.config.grpc_ignore_methods.include?(method)
 
-          tracer = OpenTracing.global_tracer
-          on_finish_span = options[:on_finish_span]
+          if Wrapper.config.grpc_ignore_methods.include?(method)
+            OpenTelemetry::Common::Utilities.untraced do
+              return yield
+            end
+          end
+
+          tracer = OpenTelemetry.tracer_provider.tracer("gruf")
           service_class = request.service
           method_name = request.method_key
           name = method_name.to_s.camelize
           route = "/#{service_class.service_name}/#{name}"
 
-          begin
-            tags = {
-              "component" => "gRPC",
-              "span.kind" => "server",
-              "grpc.method_type" => "request_response",
-            }
-            hpack_carrier = Hpack.new(request.active_call.metadata)
-            parent_span_context = tracer.extract(::OpenTracing::FORMAT_TEXT_MAP, hpack_carrier)
-            current_scope = tracer.start_active_span(
-              route,
-              child_of: parent_span_context,
-              tags: tags,
-            )
-            current_span = current_scope.span
-            current_span.log_kv(event: "request", data: request.message.to_h)
+          attributes = {
+            "component" => "gRPC",
+            "span.kind" => "server",
+            "grpc.method_type" => "request_response",
+          }
 
-            response = yield
-
-            if response.try(:error_fields)
-              current_span.set_tag("error", true)
-              current_span.log_kv(event: "error", data: response.to_h)
+          extracted_context = OpenTelemetry.propagation.extract(request.active_call.metadata)
+          OpenTelemetry::Context.with_current(extracted_context) do
+            tracer.in_span(route, attributes: attributes) do |request_span|
+              request_span.add_event(
+                "request",
+                attributes: {
+                  "data" => JSON.dump(request.message.to_h),
+                }
+              )
+              yield
             end
-          rescue => e
-            if current_span
-              current_span.set_tag("error", true)
-              current_span.log_kv(event: "error", error_object: e)
-            end
-            raise
-          ensure
-            on_finish_span&.call(current_span)
-            current_scope.close if current_span
           end
-
-          response
         end
-        # rubocop:enable Metrics/MethodLength
       end
     end
   end

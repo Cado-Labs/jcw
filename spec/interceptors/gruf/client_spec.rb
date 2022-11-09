@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require "google/protobuf"
-require "opentracing"
-
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_message "rpc.Request" do
     optional :id, :uint32, 1
@@ -14,51 +11,50 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
 end
 
 RSpec.describe JCW::Interceptors::Gruf::Client do
-  def set_jaeger
-    ::JCW::Wrapper.configure do |config|
-      config.service_name = "ServiceName"
-      config.connection = connection
-      config.enabled = enabled
-    end
+  before do
+    exporter.reset
+    allow(instrumentation_class).to receive(:tracer).with("gruf").and_return(instrumentation)
   end
 
-  let(:enabled) { true }
-  let(:connection) { { protocol: :udp, host: "127.0.0.1", port: 6831 } }
-
-  let(:type) { :request_response }
+  let(:exporter) { EXPORTER }
+  let(:instrumentation_class) { OpenTelemetry.tracer_provider }
+  let(:instrumentation) { instrumentation_class.tracer("gruf") }
+  let(:span) { exporter.finished_spans.first }
   let(:requests) do
-    [::Google::Protobuf::DescriptorPool.generated_pool.lookup("rpc.Request").msgclass]
+    [::Google::Protobuf::DescriptorPool.generated_pool.lookup("rpc.Request").msgclass.new]
   end
-  let(:call) { double(:call, output_metadata: {}) }
-  let(:grpc_method) { "/rpc.Request" }
-  let(:metadata) { { foo: "bar" } }
-
   let(:request_context) do
     Gruf::Outbound::RequestContext.new(
-      type: type,
+      type: :request_response,
       requests: requests,
-      call: call,
-      method: grpc_method,
-      metadata: metadata,
+      call: double(:call, output_metadata: {}),
+      method: "/rpc.Request",
+      metadata: { foo: "bar" },
     )
   end
   let(:block) { proc { "test" } }
   let(:client_call) { described_class.new.call(request_context: request_context, &block) }
 
   describe "Client" do
-    before { set_jaeger }
-
-    context "with metadata" do
-      it do
+    context "request" do
+      it "get response and finish span" do
         expect(client_call).to be_truthy
+        expect(exporter.finished_spans.size).to eq(1)
+        expect(span.attributes["component"]).to eq("gRPC")
+        expect(span.attributes["span.kind"]).to eq("client")
+        expect(span.attributes["grpc.method_type"]).to eq("request_response")
       end
-    end
 
-    context "with mock" do
-      before { allow(::Jaeger::Injectors).to receive(:context_as_jaeger_string).and_return(nil) }
+      context "raise error" do
+        let(:block) { proc { raise StandardError } }
 
-      it do
-        expect(client_call).to be_truthy
+        it "get response and finish span" do
+          expect { client_call }.to raise_error(StandardError)
+          expect(exporter.finished_spans.size).to eq(1)
+          expect(span.attributes["component"]).to eq("gRPC")
+          expect(span.attributes["span.kind"]).to eq("client")
+          expect(span.attributes["grpc.method_type"]).to eq("request_response")
+        end
       end
     end
   end
