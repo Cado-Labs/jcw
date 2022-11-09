@@ -29,8 +29,8 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
-  spec.add_development_dependency "opentelemetry-test-helpers"
   spec.add_development_dependency "gruf"
+  spec.add_development_dependency "opentelemetry-test-helpers"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "railties"
   spec.add_development_dependency "rake"

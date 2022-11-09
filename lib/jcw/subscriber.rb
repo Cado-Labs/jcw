@@ -31,7 +31,7 @@ module JCW
         attributes: {
           "context" => JSON.dump(payload),
           "duration" => duration,
-        }
+        },
       )
     end
   end

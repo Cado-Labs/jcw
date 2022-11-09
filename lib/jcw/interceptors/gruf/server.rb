@@ -33,12 +33,13 @@ module JCW
                 "request",
                 attributes: {
                   "data" => JSON.dump(request.message.to_h),
-                }
+                },
               )
               yield
             end
           end
         end
+        # rubocop:enable Metrics/MethodLength
       end
     end
   end

@@ -46,7 +46,7 @@ RSpec.describe JCW::Wrapper do
     end
 
     specify "set subscribers" do
-      expect(ActiveSupport::Notifications).to receive(:subscribe).with(/.*/).once
+      expect(ActiveSupport::Notifications).to receive(:monotonic_subscribe).with(/.*/)
       init
       expect(span).to eq nil
     end
@@ -55,7 +55,7 @@ RSpec.describe JCW::Wrapper do
       let(:subscribe_to) { [] }
 
       specify "subscribers not set" do
-        expect(ActiveSupport::Notifications).not_to receive(:subscribe).with(/.*/)
+        expect(ActiveSupport::Notifications).not_to receive(:monotonic_subscribe).with(/.*/)
         init
         expect(span).to eq nil
       end
