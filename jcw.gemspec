@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Alexander Starovojtov"]
   spec.email         = ["starovojtov.alexander@gmail.com"]
 
-  spec.summary       = "Wrapper for opentelemetry client"
+  spec.summary       = "Helper for opentelemetry-ruby"
   spec.description   = "Helper for the 'opentelemetry-ruby'."
   spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"

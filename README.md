@@ -30,8 +30,6 @@ require 'jcw'
 
 ## Usage
 
-Create new initializer for your rails app:
-
 #### GRPC Integration
 Client side
 
@@ -65,22 +63,27 @@ end
 end
 ```
 
-Example setting Opentelemetry
+#### Example settings Opentelemetry
+
+Add your base gem for Opentelemetry to a Gemfile:
 
 ```ruby
-# Add base gems to gemfile
 gem "opentelemetry-exporter-jaeger"
 gem "opentelemetry-sdk"
+```
 
-# Add specific gems for instrumentations
-gem "opentelemetry-instrumentation-pg"
+Add specific gems for instrumentations, example:
+```ruby
+ggem "opentelemetry-instrumentation-pg"
 gem "opentelemetry-instrumentation-http"
 gem "opentelemetry-instrumentation-rack"
 gem "opentelemetry-instrumentation-redis"
 gem "opentelemetry-instrumentation-sidekiq"
+```
 
-# Configure OpenTelemetry::SDK
-# Add to initializers
+Add to initializer and configure OpenTelemetry::SDK
+
+```ruby
 require "opentelemetry/sdk"
 require "opentelemetry/exporter/jaeger"
 require "opentelemetry/instrumentation/rack"
@@ -89,17 +92,17 @@ require "opentelemetry/instrumentation/redis"
 require "opentelemetry/instrumentation/pg"
 
 OpenTelemetry::SDK.configure do |c|
-  c.service_name = PROJECT.project_id
-  c.use "OpenTelemetry::Instrumentation::HTTP"
-  c.use "OpenTelemetry::Instrumentation::Rack", {
+  c.service_name = "PROJECT"
+  c.use("OpenTelemetry::Instrumentation::HTTP")
+  c.use("OpenTelemetry::Instrumentation::Rack", {
     url_quantization: -> (path, _env) { path.to_s },
     untraced_endpoints: %w[/cable],
-  }
-  c.use "OpenTelemetry::Instrumentation::Sidekiq", {
+  })
+  c.use("OpenTelemetry::Instrumentation::Sidekiq", {
     span_naming: :job_class,
     peer_service: "Sidekiq",
-  }
-  c.use "OpenTelemetry::Instrumentation::Redis", {
+  })
+  c.use("OpenTelemetry::Instrumentation::Redis", {
     peer_service: "REDIS",
     # The obfuscation of arguments in the db.statement attribute is enabled by default.
     # To include the full query, set db_statement to :include.
@@ -107,8 +110,8 @@ OpenTelemetry::SDK.configure do |c|
     # To omit the attribute, set db_statement to :omit.
     db_statement: :include,
     trace_root_spans: false,
-  }
-  c.use "OpenTelemetry::Instrumentation::PG", {
+  })
+  c.use("OpenTelemetry::Instrumentation::PG", {
     # You may optionally set a value for 'peer.service', which
     # will be included on all spans from this instrumentation:
     peer_service: "Postgres",
@@ -117,7 +120,7 @@ OpenTelemetry::SDK.configure do |c|
     # semantic attribute. Optionally, you may disable the inclusion of this attribute entirely by
     # setting this option to :omit or sanitize the attribute by setting to :obfuscate
     db_statement: :include,
-  }
+  })
   c.add_span_processor(
     OpenTelemetry::SDK::Trace::Export::SimpleSpanProcessor.new(
       OpenTelemetry::Exporter::Jaeger::AgentExporter.new(
@@ -128,6 +131,9 @@ OpenTelemetry::SDK.configure do |c|
   )
 end
 ```
+
+For more information on <a href="https://github.com/open-telemetry/opentelemetry-ruby">
+OpenTelemetry</a>, visit: https://opentelemetry.io/ 
 
 ### Contributing
 
