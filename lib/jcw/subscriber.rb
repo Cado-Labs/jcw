@@ -26,7 +26,7 @@ module JCW
       end
 
       duration = format("%0.3fms", duration * 1000)
-      span.log_kv(message: name, context: JSON.dump(payload), duration: duration)
+      span.log_kv(message: name, context: Oj.dump(payload), duration: duration)
     end
   end
 end
