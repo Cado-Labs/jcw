@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "activesupport", ">= 5.0"
   spec.add_dependency "httprb-opentracing", "~> 0.4.0"
   spec.add_dependency "jaeger-client", "~> 1.3.0"
+  spec.add_dependency "oj"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
