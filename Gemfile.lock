@@ -1,10 +1,11 @@
 PATH
   remote: .
   specs:
-    jcw (0.5.2)
+    jcw (0.6.0)
       activesupport (>= 5.0)
-      httprb-opentracing (~> 0.4.0)
-      jaeger-client (~> 1.3.0)
+      opentelemetry-exporter-jaeger (>= 0.21.0)
+      opentelemetry-sdk (~> 1.2)
+      thrift
 
 GEM
   remote: https://rubygems.org/
@@ -27,8 +28,6 @@ GEM
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
-    addressable (2.8.0)
-      public_suffix (>= 2.0.2, < 5.0)
     ast (2.4.2)
     builder (3.2.4)
     bundler-audit (0.9.1)
@@ -39,17 +38,11 @@ GEM
     crass (1.0.6)
     diff-lcs (1.5.0)
     docile (1.4.0)
-    domain_name (0.5.20190701)
-      unf (>= 0.0.5, < 1.0.0)
     e2mmap (0.1.0)
     erubi (1.10.0)
-    ffi (1.15.5)
-    ffi-compiler (1.0.1)
-      ffi (>= 1.0.0)
-      rake
-    google-protobuf (3.21.4)
-    google-protobuf (3.21.4-x86_64-darwin)
-    google-protobuf (3.21.4-x86_64-linux)
+    google-protobuf (3.21.9)
+    google-protobuf (3.21.9-x86_64-darwin)
+    google-protobuf (3.21.9-x86_64-linux)
     googleapis-common-protos-types (1.3.2)
       google-protobuf (~> 3.14)
     grpc (1.48.0)
@@ -72,50 +65,47 @@ GEM
       slop (>= 4.6)
       thwait (>= 0.1)
       zeitwerk (>= 2)
-    http (5.1.0)
-      addressable (~> 2.8)
-      http-cookie (~> 1.0)
-      http-form_data (~> 2.2)
-      llhttp-ffi (~> 0.4.0)
-    http-cookie (1.0.5)
-      domain_name (~> 0.5)
-    http-form_data (2.3.0)
-    http-parser (1.2.3)
-      ffi-compiler (>= 1.0, < 2.0)
-    httprb-opentracing (0.4.0)
-      opentracing (~> 0.5.0)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
-    jaeger-client (1.3.0)
-      opentracing (~> 0.3)
-      thrift
     json (2.6.2)
-    llhttp-ffi (0.4.0)
-      ffi-compiler (~> 1.0)
-      rake (~> 13.0)
     loofah (2.18.0)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     method_source (1.0.0)
     mini_portile2 (2.8.0)
     minitest (5.16.2)
-    nokogiri (1.13.8)
+    nokogiri (1.13.9)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
-    nokogiri (1.13.8-x86_64-darwin)
+    nokogiri (1.13.9-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.13.8-x86_64-linux)
+    nokogiri (1.13.9-x86_64-linux)
       racc (~> 1.4)
-    opentracing (0.5.0)
-    opentracing_test_tracer (0.1.1)
-      opentracing
+    opentelemetry-api (1.1.0)
+    opentelemetry-common (0.19.6)
+      opentelemetry-api (~> 1.0)
+    opentelemetry-exporter-jaeger (0.22.0)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-common (~> 0.19.6)
+      opentelemetry-sdk (~> 1.2)
+      opentelemetry-semantic_conventions
+      thrift
+    opentelemetry-registry (0.2.0)
+      opentelemetry-api (~> 1.1)
+    opentelemetry-sdk (1.2.0)
+      opentelemetry-api (~> 1.1)
+      opentelemetry-common (~> 0.19.3)
+      opentelemetry-registry (~> 0.2)
+      opentelemetry-semantic_conventions
+    opentelemetry-semantic_conventions (1.8.0)
+      opentelemetry-api (~> 1.0)
+    opentelemetry-test-helpers (0.3.0)
     parallel (1.22.1)
     parser (3.1.2.0)
       ast (~> 2.4.1)
     pry (0.14.1)
       coderay (~> 1.1)
       method_source (~> 1.0)
-    public_suffix (4.0.7)
     racc (1.6.0)
     rack (2.2.4)
     rack-test (2.0.2)
@@ -190,14 +180,11 @@ GEM
     simplecov_json_formatter (0.1.4)
     slop (4.9.2)
     thor (1.2.1)
-    thrift (0.16.0)
+    thrift (0.17.0)
     thwait (0.2.0)
       e2mmap
     tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    unf (0.1.4)
-      unf_ext
-    unf_ext (0.0.8.2)
     unicode-display_width (2.2.0)
     zeitwerk (2.6.0)
 
@@ -210,10 +197,8 @@ DEPENDENCIES
   bundler
   bundler-audit
   gruf
-  http
-  http-parser
   jcw!
-  opentracing_test_tracer
+  opentelemetry-test-helpers
   pry
   railties
   rake

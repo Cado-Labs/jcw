@@ -25,8 +25,18 @@ end
 require "bundler/setup"
 require "jcw"
 require "pry"
-require "rack/mock"
-require "opentracing_test_tracer"
+require "opentelemetry/sdk"
+require "google/protobuf"
+require "json"
+require "opentelemetry-test-helpers"
+
+# global opentelemetry-sdk setup:
+EXPORTER = OpenTelemetry::SDK::Trace::Export::InMemorySpanExporter.new
+span_processor = OpenTelemetry::SDK::Trace::Export::SimpleSpanProcessor.new(EXPORTER)
+
+OpenTelemetry::SDK.configure do |c|
+  c.add_span_processor span_processor
+end
 
 RSpec.configure do |config|
   Kernel.srand config.seed

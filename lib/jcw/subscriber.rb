@@ -16,8 +16,8 @@ module JCW
       # skip Rails internal events
       return if name.start_with?("!")
 
-      span = OpenTracing.scope_manager.active&.span
-      return if span.blank?
+      span = OpenTelemetry::Trace.current_span
+      return unless span.context.valid?
 
       if payload.is_a?(Hash)
         # we should only mutate the copy of the payload
@@ -26,7 +26,13 @@ module JCW
       end
 
       duration = format("%0.3fms", duration * 1000)
-      span.log_kv(message: name, context: JSON.dump(payload), duration: duration)
+      span.add_event(
+        name,
+        attributes: {
+          "context" => JSON.dump(payload),
+          "duration" => duration,
+        },
+      )
     end
   end
 end

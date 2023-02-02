@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Alexander Starovojtov"]
   spec.email         = ["starovojtov.alexander@gmail.com"]
 
-  spec.summary       = "Wrapper for jaeger-client"
-  spec.description   = "Wrapper for the gem 'jaeger-client' with simpler customization."
+  spec.summary       = "Helper for opentelemetry-ruby"
+  spec.description   = "Helper for the 'opentelemetry-ruby'."
   spec.homepage      = "https://github.com/Cado-Labs/jcw"
   spec.license       = "MIT"
   spec.required_ruby_version = Gem::Requirement.new(">= 2.7.0")
@@ -23,15 +23,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "activesupport", ">= 5.0"
-  spec.add_dependency "httprb-opentracing", "~> 0.4.0"
-  spec.add_dependency "jaeger-client", "~> 1.3.0"
+  spec.add_dependency "opentelemetry-exporter-jaeger", ">= 0.21.0"
+  spec.add_dependency "opentelemetry-sdk", "~> 1.2"
+  spec.add_dependency "thrift"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "gruf"
-  spec.add_development_dependency "http"
-  spec.add_development_dependency "http-parser"
-  spec.add_development_dependency "opentracing_test_tracer"
+  spec.add_development_dependency "opentelemetry-test-helpers"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "railties"
   spec.add_development_dependency "rake"

@@ -5,25 +5,25 @@ module JCW
     module Gruf
       class Client < ::Gruf::Interceptors::ClientInterceptor
         def call(request_context:)
-          tracer = OpenTracing.global_tracer
+          tracer = OpenTelemetry.tracer_provider.tracer("gruf")
           metadata = request_context.metadata
 
-          tags = {
+          attributes = {
             "component" => "gRPC",
             "span.kind" => "client",
             "grpc.method_type" => "request_response",
-            "grpc.headers" => metadata,
+            "grpc.headers" => JSON.dump(metadata),
           }
 
-          tracer.start_active_span(request_context.method.to_s, tags: tags) do |current_scope|
-            current_span = current_scope.span
-            current_span.log_kv(
-              event: "request",
-              data: request_context.requests.map { |request| request.try(:to_h) },
-            )
-            hpack_carrier = Hpack.new(metadata)
-            tracer.inject(current_span.context, ::OpenTracing::FORMAT_TEXT_MAP, hpack_carrier)
+          tracer.in_span(request_context.method.to_s, attributes: attributes) do |span|
+            OpenTelemetry.propagation.inject(metadata)
 
+            span.add_event(
+              "request",
+              attributes: {
+                "data" => JSON.dump(request_context.requests.map(&:to_h)),
+              },
+            )
             yield
           end
         end
